@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Digital Twin</title>
+    <style>
+        :root {
+            --bg: #edf2f7;
+            --panel: #ffffff;
+            --panel-border: #d7e0ea;
+            --text: #1a2736;
+            --muted: #5f6f80;
+            --accent: #1876c8;
+            --danger: #d84a4a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        .app {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at 24% 10%, #263445 0%, #101a24 55%, #0b141d 100%);
+        }
+
+        .left {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .topbar {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 420px;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            border: 1px solid rgba(206, 224, 244, 0.42);
+            border-radius: 14px;
+            background: rgba(14, 28, 43, 0.42);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 10px;
+        }
+
+        .chip {
+            font-size: 12px;
+            color: #e5eef8;
+            border: 1px solid rgba(201, 219, 241, 0.38);
+            background: rgba(201, 219, 241, 0.14);
+            border-radius: 999px;
+            padding: 6px 10px;
+        }
+
+        .btn {
+            border: 1px solid rgba(197, 216, 238, 0.52);
+            background: rgba(198, 221, 246, 0.14);
+            color: #e9f3ff;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn[disabled] {
+            opacity: 0.45;
+            cursor: default;
+        }
+
+        .btn.primary {
+            border-color: #6db8ff;
+            background: rgba(31, 128, 214, 0.92);
+            color: #fff;
+        }
+
+        #status {
+            margin-left: auto;
+            font-size: 12px;
+            color: #d0deed;
+        }
+
+        #boot-error {
+            display: none;
+            width: 100%;
+            border: 1px solid rgba(239, 194, 194, 0.9);
+            border-radius: 8px;
+            background: rgba(255, 235, 235, 0.92);
+            color: #9f3232;
+            font-size: 12px;
+            padding: 8px 10px;
+        }
+
+        #view-stack {
+            position: absolute;
+            inset: 0;
+            border-radius: 0;
+            overflow: hidden;
+            border: 0;
+            background: #0f1b26;
+        }
+
+        .view-pane {
+            position: absolute;
+            inset: 0;
+            transition: opacity 420ms ease, transform 420ms ease;
+        }
+
+        #world-pane {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        #detail-pane {
+            opacity: 0;
+            transform: scale(1.02);
+            pointer-events: none;
+        }
+
+        #view-stack.detail-mode #world-pane {
+            opacity: 0;
+            transform: scale(0.985);
+            pointer-events: none;
+        }
+
+        #view-stack.detail-mode #detail-pane {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .view-host {
+            width: 100%;
+            height: 100%;
+        }
+
+        .tag {
+            position: absolute;
+            top: 88px;
+            left: 14px;
+            z-index: 20;
+            border: 1px solid rgba(204, 216, 228, 0.55);
+            border-radius: 8px;
+            background: rgba(15, 29, 44, 0.5);
+            padding: 6px 10px;
+            font-size: 12px;
+            color: #e7f0fb;
+        }
+
+        .attribution {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            z-index: 20;
+            border: 1px solid rgba(204, 216, 228, 0.55);
+            border-radius: 8px;
+            background: rgba(15, 29, 44, 0.5);
+            padding: 6px 10px;
+            font-size: 11px;
+            color: #e7f0fb;
+        }
+
+        .attribution a {
+            color: #75bdff;
+            text-decoration: none;
+        }
+
+        .right {
+            position: absolute;
+            right: 14px;
+            top: 14px;
+            bottom: 14px;
+            width: 390px;
+            z-index: 70;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 2px;
+        }
+
+        .card {
+            background: rgba(208, 223, 241, 0.16);
+            border: 1px solid rgba(208, 223, 241, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 12px;
+            padding: 12px;
+            color: #eaf3ff;
+        }
+
+        .title {
+            margin: 0 0 6px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .muted {
+            color: #cae0f7;
+            font-size: 12px;
+        }
+
+        .kpi-grid {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .kpi {
+            border: 1px solid rgba(222, 232, 242, 0.38);
+            border-radius: 8px;
+            background: rgba(242, 248, 255, 0.2);
+            padding: 8px;
+        }
+
+        .kpi .k {
+            font-size: 11px;
+            color: #cae0f7;
+        }
+
+        .kpi .v {
+            margin-top: 4px;
+            font-size: 30px;
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        .bar-row {
+            margin-top: 8px;
+        }
+
+        .bar-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .bar-track {
+            width: 100%;
+            height: 9px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(219, 232, 247, 0.25);
+        }
+
+        .bar-fill {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #49b7f8, #1976c8);
+            transition: width 260ms ease;
+        }
+
+        .meta-grid {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+        }
+
+        .meta {
+            border: 1px solid rgba(222, 232, 241, 0.35);
+            border-radius: 8px;
+            background: rgba(248, 251, 254, 0.2);
+            padding: 7px;
+        }
+
+        .meta .k {
+            font-size: 11px;
+            color: #cae0f7;
+        }
+
+        .meta .v {
+            margin-top: 3px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        #alert-list {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 180px;
+            overflow: auto;
+        }
+
+        #alert-list li {
+            margin: 5px 0;
+        }
+
+        .stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 2px;
+        }
+
+        .panel-tab {
+            border: 1px solid rgba(200, 217, 237, 0.45);
+            background: rgba(169, 196, 224, 0.18);
+            color: #dbeaf9;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .panel-tab.active {
+            background: rgba(22, 115, 195, 0.9);
+            color: #fff;
+            border-color: #71bdff;
+        }
+
+        .pane-hidden {
+            display: none;
+        }
+
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            border: 1px solid rgba(211, 230, 248, 0.52);
+            background: linear-gradient(135deg, #208be5, #165388);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .role-select {
+            width: 100%;
+            margin-top: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(202, 219, 237, 0.45);
+            background: rgba(238, 247, 255, 0.2);
+            color: #eef6ff;
+            padding: 7px 8px;
+            font-size: 12px;
+        }
+
+        .perm-list {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .perm {
+            border-radius: 999px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid rgba(170, 210, 173, 0.45);
+            color: #d8f2d7;
+            background: rgba(42, 122, 61, 0.26);
+        }
+
+        .perm.denied {
+            border-color: rgba(225, 153, 153, 0.5);
+            color: #ffd3d3;
+            background: rgba(148, 43, 43, 0.3);
+        }
+
+        .alert-contrast {
+            border-color: rgba(255, 102, 102, 0.65);
+            background: linear-gradient(160deg, rgba(67, 15, 20, 0.92), rgba(98, 28, 25, 0.88));
+        }
+
+        .alert-kpis {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .alert-kpi {
+            border: 1px solid rgba(255, 145, 145, 0.5);
+            border-radius: 8px;
+            background: rgba(255, 118, 118, 0.14);
+            padding: 8px;
+        }
+
+        .alert-kpi .k {
+            font-size: 11px;
+            color: #ffd0d0;
+        }
+
+        .alert-kpi .v {
+            margin-top: 4px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff0f0;
+        }
+
+        #alert-list-contrast {
+            margin: 10px 0 0;
+            padding-left: 0;
+            list-style: none;
+            max-height: 320px;
+            overflow: auto;
+            font-size: 12px;
+        }
+
+        .alert-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 8px;
+            align-items: start;
+            padding: 8px;
+            margin-bottom: 7px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 138, 138, 0.45);
+            background: rgba(255, 99, 99, 0.12);
+        }
+
+        .alert-item.watch {
+            border-color: rgba(255, 213, 128, 0.45);
+            background: rgba(255, 182, 67, 0.14);
+        }
+
+        .alert-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 62px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            line-height: 1;
+            padding: 5px 7px;
+            color: #ffefef;
+            background: #d33d3d;
+        }
+
+        .alert-badge.watch {
+            color: #fff4dc;
+            background: #b97019;
+        }
+
+        .alert-text {
+            color: #ffecec;
+        }
+
+        .detail-popup {
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            z-index: 90;
+            width: min(320px, calc(100% - 36px));
+            border-radius: 12px;
+            border: 1px solid rgba(197, 217, 238, 0.45);
+            background: rgba(12, 29, 44, 0.86);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: #e9f2fc;
+            padding: 10px;
+            display: none;
+            transform-origin: 18px 20px;
+            animation: bubbleIn 180ms ease;
+        }
+
+        .detail-popup.visible {
+            display: block;
+        }
+
+        .detail-popup::after {
+            content: "";
+            position: absolute;
+            left: var(--tail-x, 18px);
+            top: calc(100% - 3px);
+            width: 12px;
+            height: 12px;
+            transform: rotate(45deg);
+            border-right: 1px solid rgba(197, 217, 238, 0.45);
+            border-bottom: 1px solid rgba(197, 217, 238, 0.45);
+            background: rgba(12, 29, 44, 0.86);
+        }
+
+        @keyframes bubbleIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .detail-popup-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .detail-popup-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .detail-popup-close {
+            border: 1px solid rgba(200, 220, 242, 0.5);
+            background: rgba(200, 220, 242, 0.12);
+            color: #f2f8ff;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .detail-popup-body {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .popup-cell {
+            border: 1px solid rgba(217, 231, 244, 0.32);
+            border-radius: 8px;
+            background: rgba(231, 242, 252, 0.14);
+            padding: 6px;
+        }
+
+        @media (max-width: 980px) {
+            .topbar {
+                right: 14px;
+            }
+            .right {
+                width: calc(100% - 28px);
+                top: auto;
+                max-height: 48%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <section class="left">
+            <div class="topbar">
+                <span class="chip">Digital Twin: map texture integrated in 3D world</span>
+                <button class="btn" id="btn-city-view">3D City View</button>
+                <button class="btn" id="btn-style">Map Style</button>
+                <button class="btn primary" id="btn-enter-detail" disabled>Enter Building View</button>
+                <button class="btn" id="btn-back" style="display:none;">Back To 3D World</button>
+                <button class="btn" id="btn-user">User Settings</button>
+                <span class="chip" id="map-meta-chip">Style: Carto Dark · Zoom 16</span>
+                <span id="status">Loading map tiles...</span>
+                <div id="boot-error"></div>
+            </div>
+
+            <div id="view-stack">
+                <div id="world-pane" class="view-pane">
+                    <div class="tag">3D World (Basemap + buildings)</div>
+                    <div id="world-host" class="view-host"></div>
+                    <div class="attribution" id="attribution"></div>
+                </div>
+                <div id="detail-pane" class="view-pane">
+                    <div class="tag">Building Detail View</div>
+                    <div id="detail-host" class="view-host"></div>
+                    <div class="detail-popup" id="detail-popup">
+                        <div class="detail-popup-head">
+                            <div class="detail-popup-title" id="detail-popup-title">Building</div>
+                            <button class="detail-popup-close" id="detail-popup-close">Close</button>
+                        </div>
+                        <div class="detail-popup-body" id="detail-popup-body"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="right">
+            <section class="card">
+                <div class="user-row">
+                    <div class="avatar">SC</div>
+                    <div>
+                        <div class="title" style="font-size:16px; margin:0;">John Doe</div>
+                        <div class="muted" id="role-caption">Role: Operator</div>
+                    </div>
+                </div>
+                <select class="role-select" id="role-select">
+                    <option value="Viewer">Viewer</option>
+                    <option value="Operator" selected>Operator</option>
+                    <option value="Admin">Admin</option>
+                </select>
+                <div class="perm-list" id="perm-list"></div>
+            </section>
+
+            <section class="card">
+                <h1 class="title">Smart City Digital Twin</h1>
+                <div class="muted">Click a building in the city to transition into building-only mode.</div>
+                <div class="kpi-grid">
+                    <div class="kpi"><div class="k">Buildings</div><div class="v" id="kpi-buildings">0</div></div>
+                    <div class="kpi"><div class="k">Grid Load (MW)</div><div class="v" id="kpi-load">0</div></div>
+                    <div class="kpi"><div class="k">Avg Occupancy</div><div class="v" id="kpi-occupancy">0%</div></div>
+                    <div class="kpi"><div class="k">Active Alerts</div><div class="v" id="kpi-alerts">0</div></div>
+                </div>
+            </section>
+
+            <div class="panel-tabs">
+                <button class="panel-tab active" id="tab-dashboard">Dashboard</button>
+                <button class="panel-tab" id="tab-alerts">Alerts</button>
+            </div>
+
+            <div id="dashboard-pane" class="stack">
+                <section class="card">
+                    <h2 class="title" style="font-size:16px;">District Utilization</h2>
+                    <div id="district-bars"></div>
+                </section>
+
+                <section class="card">
+                    <h2 class="title" style="font-size:16px;">Selected Building</h2>
+                    <div class="muted" id="selected-name">No building selected</div>
+                    <div class="meta-grid">
+                        <div class="meta"><div class="k">District</div><div class="v" id="meta-district">-</div></div>
+                        <div class="meta"><div class="k">Type</div><div class="v" id="meta-type">-</div></div>
+                        <div class="meta"><div class="k">Energy</div><div class="v" id="meta-energy">-</div></div>
+                        <div class="meta"><div class="k">Occupancy</div><div class="v" id="meta-occupancy">-</div></div>
+                    </div>
+                </section>
+
+                <section class="card" style="flex:1; min-height:170px;">
+                    <h2 class="title" style="font-size:16px;">Priority Alerts</h2>
+                    <ul id="alert-list"></ul>
+                </section>
+            </div>
+
+            <div id="alerts-pane" class="stack pane-hidden">
+                <section class="card alert-contrast" style="flex:1; min-height:300px;">
+                    <h2 class="title" style="font-size:18px;">Alerts Console</h2>
+                    <div class="muted">High-contrast event stream with severity tags.</div>
+                    <div class="alert-kpis">
+                        <div class="alert-kpi"><div class="k">Critical</div><div class="v" id="alert-critical-count">0</div></div>
+                        <div class="alert-kpi"><div class="k">Watch</div><div class="v" id="alert-watch-count">0</div></div>
+                    </div>
+                    <ul id="alert-list-contrast"></ul>
+                </section>
+            </div>
+        </aside>
+    </div>
+
+    <script src="ht.js"></script>
+    <script>
+        (function () {
+            var app = {
+                center: { lat: 40.7128, lng: -74.0060 },
+                baseZoom: 16,
+                zoom: 16,
+                minZoom: 14,
+                maxZoom: 18,
+                baseTileSpan: 6,
+                minTileSpan: 3,
+                tileSpan: 6,
+                maxTileSpan: 12,
+                tileSize: 256,
+                baseUnitsPerPixel: 3.1,
+                unitsPerPixel: 3.1,
+                mapTextureName: "osm.floor.texture",
+                currentMapStyle: "cartoDark",
+                mapStyles: {
+                    cartoDark: {
+                        name: "Carto Dark",
+                        url: "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+                        subdomains: ["a", "b", "c", "d"],
+                        retina: true,
+                        tint: "rgba(0, 0, 0, 0)",
+                        attribution: 'Map tiles &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+                    },
+                    cartoDarkLabels: {
+                        name: "Carto Dark Labels",
+                        url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+                        subdomains: ["a", "b", "c", "d"],
+                        retina: true,
+                        tint: "rgba(0, 0, 0, 0)",
+                        attribution: 'Map tiles &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+                    },
+                    osm: {
+                        name: "OpenStreetMap",
+                        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        subdomains: [],
+                        retina: false,
+                        tint: "rgba(7, 12, 18, 0.2)",
+                        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+                    },
+                    cartoLight: {
+                        name: "Carto Light",
+                        url: "https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png",
+                        subdomains: ["a", "b", "c", "d"],
+                        retina: true,
+                        tint: "rgba(23, 41, 58, 0.04)",
+                        attribution: 'Map tiles &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+                    },
+                    cartoVoyager: {
+                        name: "Carto Voyager",
+                        url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png",
+                        subdomains: ["a", "b", "c", "d"],
+                        retina: true,
+                        tint: "rgba(8, 13, 19, 0.16)",
+                        attribution: 'Map tiles &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>, data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>'
+                    }
+                },
+
+                worldDM: null,
+                world3d: null,
+                detailDM: null,
+                detail3d: null,
+
+                floorNode: null,
+                detailFloor: null,
+                detailBuildingNode: null,
+
+                buildings: [],
+                byId: {},
+                selectedId: null,
+                detailOpen: false,
+                telemetryTimer: null,
+                suppressSelectionTransition: false,
+                animateBuildingHeights: false,
+
+                mapMeta: null,
+                districtBarEls: {},
+                tileStats: { ok: 0, fail: 0 },
+                activeZoom: 16,
+                mapLoading: false,
+                pendingZoom: null,
+                pendingForce: false,
+                mapReloadToken: 0,
+                zoomMonitorTimer: null,
+                mapTextureScale: 1,
+                zoomCandidate: null,
+                zoomCandidateCount: 0,
+                detailPopupAnchor: null,
+
+                currentRole: "Operator",
+                rolePermissions: {
+                    Viewer: {
+                        enterBuilding: false,
+                        styleSwitch: false,
+                        detailPopup: true,
+                        alertConsole: false
+                    },
+                    Operator: {
+                        enterBuilding: true,
+                        styleSwitch: true,
+                        detailPopup: true,
+                        alertConsole: true
+                    },
+                    Admin: {
+                        enterBuilding: true,
+                        styleSwitch: true,
+                        detailPopup: true,
+                        alertConsole: true
+                    }
+                },
+
+                init: function () {
+                    this.cacheDom();
+                    this.bindButtons();
+                    if (!window.ht || !window.ht.graph3d || !window.ht.graph3d.Graph3dView) {
+                        this.showBootError("HT Graph3dView runtime not available.");
+                        return;
+                    }
+
+                    this.initWorld3d();
+                    this.initDetail3d();
+                    this.bindDetailInteraction();
+                    this.buildDistrictBars();
+                    this.bindResize();
+                    this.updateAttribution();
+                    this.updateMapMetaChip();
+                    this.applyRole(this.currentRole);
+                    this.openPanelTab("dashboard");
+
+                    this.reloadMapForZoom(this.zoom, true).then(function () {
+                        app.activeZoom = app.zoom;
+                        app.createBuildings(48);
+                        app.bindWorldSelection();
+                        app.bindWorldInteraction();
+                        app.startZoomMonitor();
+                        app.updateDashboard();
+                        app.startTelemetry();
+                        app.world3d.invalidate();
+                    }).catch(function (err) {
+                        app.showBootError(err && err.message ? err.message : String(err));
+                        app.status.textContent = "Map texture failed";
+                    });
+                },
+
+                cacheDom: function () {
+                    this.viewStack = document.getElementById("view-stack");
+                    this.detailHost = document.getElementById("detail-host");
+                    this.btnCity = document.getElementById("btn-city-view");
+                    this.btnStyle = document.getElementById("btn-style");
+                    this.btnEnter = document.getElementById("btn-enter-detail");
+                    this.btnBack = document.getElementById("btn-back");
+                    this.btnUser = document.getElementById("btn-user");
+                    this.mapMetaChip = document.getElementById("map-meta-chip");
+                    this.status = document.getElementById("status");
+                    this.bootError = document.getElementById("boot-error");
+                    this.attribution = document.getElementById("attribution");
+                    this.roleSelect = document.getElementById("role-select");
+                    this.roleCaption = document.getElementById("role-caption");
+                    this.permList = document.getElementById("perm-list");
+                    this.tabDashboard = document.getElementById("tab-dashboard");
+                    this.tabAlerts = document.getElementById("tab-alerts");
+                    this.dashboardPane = document.getElementById("dashboard-pane");
+                    this.alertsPane = document.getElementById("alerts-pane");
+                    this.alertListContrast = document.getElementById("alert-list-contrast");
+                    this.alertCriticalCount = document.getElementById("alert-critical-count");
+                    this.alertWatchCount = document.getElementById("alert-watch-count");
+                    this.detailPopup = document.getElementById("detail-popup");
+                    this.detailPopupTitle = document.getElementById("detail-popup-title");
+                    this.detailPopupBody = document.getElementById("detail-popup-body");
+                    this.detailPopupClose = document.getElementById("detail-popup-close");
+
+                    this.kpiBuildings = document.getElementById("kpi-buildings");
+                    this.kpiLoad = document.getElementById("kpi-load");
+                    this.kpiOccupancy = document.getElementById("kpi-occupancy");
+                    this.kpiAlerts = document.getElementById("kpi-alerts");
+
+                    this.selectedName = document.getElementById("selected-name");
+                    this.metaDistrict = document.getElementById("meta-district");
+                    this.metaType = document.getElementById("meta-type");
+                    this.metaEnergy = document.getElementById("meta-energy");
+                    this.metaOccupancy = document.getElementById("meta-occupancy");
+
+                    this.alertList = document.getElementById("alert-list");
+                    this.districtBars = document.getElementById("district-bars");
+                },
+
+                bindButtons: function () {
+                    var self = this;
+                    this.btnCity.addEventListener("click", function () {
+                        self.closeDetailView();
+                    });
+                    this.btnStyle.addEventListener("click", function () {
+                        self.cycleMapStyle();
+                    });
+                    this.btnEnter.addEventListener("click", function () {
+                        if (self.selectedId) {
+                            self.openDetailView(self.selectedId);
+                        }
+                    });
+                    this.btnBack.addEventListener("click", function () {
+                        self.closeDetailView();
+                    });
+                    this.btnUser.addEventListener("click", function () {
+                        self.openPanelTab("dashboard");
+                        if (self.roleSelect) self.roleSelect.focus();
+                    });
+                    this.tabDashboard.addEventListener("click", function () {
+                        self.openPanelTab("dashboard");
+                    });
+                    this.tabAlerts.addEventListener("click", function () {
+                        self.openPanelTab("alerts");
+                    });
+                    this.roleSelect.addEventListener("change", function () {
+                        self.applyRole(self.roleSelect.value);
+                    });
+                    this.detailPopupClose.addEventListener("click", function () {
+                        self.hideDetailPopup();
+                    });
+                },
+
+                openPanelTab: function (tab) {
+                    var showAlerts = tab === "alerts";
+                    this.tabDashboard.classList.toggle("active", !showAlerts);
+                    this.tabAlerts.classList.toggle("active", showAlerts);
+                    this.dashboardPane.classList.toggle("pane-hidden", showAlerts);
+                    this.alertsPane.classList.toggle("pane-hidden", !showAlerts);
+                },
+
+                applyRole: function (role) {
+                    this.currentRole = role;
+                    var perms = this.rolePermissions[role] || this.rolePermissions.Operator;
+                    this.roleCaption.textContent = "Role: " + role;
+                    this.renderPermissions(perms);
+                    this.btnStyle.disabled = !perms.styleSwitch;
+                    this.btnEnter.disabled = !this.selectedId || !perms.enterBuilding;
+                    if (!perms.enterBuilding && this.detailOpen) {
+                        this.closeDetailView();
+                    }
+                    if (!perms.alertConsole) {
+                        this.openPanelTab("dashboard");
+                        this.tabAlerts.disabled = true;
+                    }
+                    else {
+                        this.tabAlerts.disabled = false;
+                    }
+                },
+
+                renderPermissions: function (perms) {
+                    if (!this.permList) return;
+                    var labels = [
+                        ["Enter Building", perms.enterBuilding],
+                        ["Switch Map Style", perms.styleSwitch],
+                        ["Detail Popup", perms.detailPopup],
+                        ["Alert Console", perms.alertConsole]
+                    ];
+                    this.permList.innerHTML = "";
+                    for (var i = 0; i < labels.length; i++) {
+                        var p = document.createElement("span");
+                        p.className = "perm" + (labels[i][1] ? "" : " denied");
+                        p.textContent = labels[i][0];
+                        this.permList.appendChild(p);
+                    }
+                },
+
+                bindResize: function () {
+                    var self = this;
+                    window.addEventListener("resize", function () {
+                        self.world3d.invalidate();
+                        self.detail3d.invalidate();
+                    }, false);
+                },
+
+                showBootError: function (message) {
+                    this.bootError.style.display = "block";
+                    this.bootError.textContent = "Startup Error: " + message;
+                },
+
+                initWorld3d: function () {
+                    this.worldDM = new ht.DataModel();
+                    this.world3d = new ht.graph3d.Graph3dView(this.worldDM);
+
+                    var worldView = this.world3d.getView();
+                    worldView.style.background = "#1d2936";
+                    worldView.style.position = "absolute";
+                    worldView.style.left = "0";
+                    worldView.style.top = "0";
+                    worldView.style.width = "100%";
+                    worldView.style.height = "100%";
+                    this.world3d.setGridVisible(false);
+                    this.world3d.setOriginAxisVisible(false);
+                    this.world3d.setCenterAxisVisible(false);
+                    this.world3d.setEye([0, 1650, 1800]);
+                    this.world3d.setCenter([0, 120, 0]);
+                    this.world3d.setEditable(false);
+                    this.world3d.setMovableFunc(function () {
+                        return false;
+                    });
+
+                    var host = document.getElementById("world-host");
+                    host.appendChild(worldView);
+
+                    this.floorNode = new ht.Node();
+                    this.floorNode.p3([0, -2, 0]);
+                    this.floorNode.s3([3000, 4, 3000]);
+                    this.floorNode.s({
+                        "shape3d": "rect",
+                        "shape3d.color": "#1e2a35",
+                        "shape3d.top.color": "#2a3b4d",
+                        "shape3d.top.visible": true,
+                        "shape3d.light": false
+                    });
+                    this.floorNode.a("kind", "ground");
+                    this.worldDM.add(this.floorNode);
+                },
+
+                initDetail3d: function () {
+                    this.detailDM = new ht.DataModel();
+                    this.detail3d = new ht.graph3d.Graph3dView(this.detailDM);
+
+                    var detailView = this.detail3d.getView();
+                    detailView.style.background = "#111922";
+                    detailView.style.position = "absolute";
+                    detailView.style.left = "0";
+                    detailView.style.top = "0";
+                    detailView.style.width = "100%";
+                    detailView.style.height = "100%";
+                    this.detail3d.setGridVisible(true);
+                    this.detail3d.setGridGap(60);
+                    this.detail3d.setGridSize(24);
+                    this.detail3d.setEye([620, 430, 620]);
+                    this.detail3d.setCenter([0, 130, 0]);
+                    this.detail3d.setEditable(false);
+                    this.detail3d.setMovableFunc(function () {
+                        return false;
+                    });
+
+                    var host = document.getElementById("detail-host");
+                    host.appendChild(detailView);
+
+                    this.detailFloor = new ht.Node();
+                    this.detailFloor.p3([0, -2, 0]);
+                    this.detailFloor.s3([900, 4, 900]);
+                    this.detailFloor.s({
+                        "shape3d": "box",
+                        "shape3d.color": "#1f2b38",
+                        "shape3d.top.color": "#233342",
+                        "shape3d.light": false
+                    });
+                    this.detailDM.add(this.detailFloor);
+                },
+
+                bindDetailInteraction: function () {
+                    var self = this;
+                    var sm = this.detailDM.getSelectionModel();
+                    sm.setFilterFunc(function (data) {
+                        return data && data.a("kind") === "detailBuilding";
+                    });
+                    sm.addSelectionChangeListener(function () {
+                        var data = sm.getLastData();
+                        if (!data) return;
+                        var id = data.a("buildingId");
+                        if (!id || !self.byId[id]) return;
+                        self.showDetailPopup(self.byId[id], self.detailPopupAnchor);
+                    });
+                    this.detail3d.getView().addEventListener("click", function (e) {
+                        if (!self.detailOpen) return;
+                        var data = self.detail3d.getDataAt(e);
+                        if (!data || data.a("kind") !== "detailBuilding") return;
+                        var id = data.a("buildingId") || self.selectedId;
+                        if (!id || !self.byId[id]) return;
+                        self.selectedId = id;
+                        var rect = self.detailHost.getBoundingClientRect();
+                        self.detailPopupAnchor = {
+                            x: e.clientX - rect.left,
+                            y: e.clientY - rect.top
+                        };
+                        self.showDetailPopup(self.byId[id], self.detailPopupAnchor);
+                    });
+                },
+
+                showDetailPopup: function (b, anchor) {
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    if (!perms.detailPopup || !this.detailPopup) return;
+                    this.detailPopupTitle.textContent = b.id + " says";
+                    this.detailPopupBody.innerHTML =
+                        '<div class="popup-cell">Power: <b>' + b.energy + ' kWh</b></div>' +
+                        '<div class="popup-cell">Occupancy: <b>' + b.occupancy + '%</b></div>' +
+                        '<div class="popup-cell">HVAC: <b>' + this.clamp(42 + Math.round(b.energy / 6), 40, 90) + '%</b></div>' +
+                        '<div class="popup-cell">Water: <b>' + this.clamp(18 + Math.round(b.occupancy / 2), 8, 70) + ' L/min</b></div>' +
+                        '<div class="popup-cell">CO2: <b>' + (420 + Math.round(b.occupancy * 7.2)) + ' ppm</b></div>' +
+                        '<div class="popup-cell">Alarm: <b>' + (b.alarm ? "Active" : "Normal") + '</b></div>';
+                    this.placeDetailPopup(anchor);
+                    this.detailPopup.classList.add("visible");
+                },
+
+                placeDetailPopup: function (anchor) {
+                    if (!this.detailPopup || !this.detailHost) return;
+                    var hostRect = this.detailHost.getBoundingClientRect();
+                    var popupRect = this.detailPopup.getBoundingClientRect();
+                    var hostW = Math.max(0, hostRect.width);
+                    var hostH = Math.max(0, hostRect.height);
+                    var w = popupRect.width || 320;
+                    var h = popupRect.height || 170;
+                    var x;
+                    var y;
+                    var tailX;
+
+                    if (anchor) {
+                        x = this.clamp(anchor.x + 16, 8, Math.max(8, hostW - w - 8));
+                        y = this.clamp(anchor.y - h - 14, 8, Math.max(8, hostH - h - 8));
+                        tailX = this.clamp(anchor.x - x - 6, 12, w - 26);
+                    }
+                    else {
+                        x = this.clamp(hostW * 0.5 - w * 0.5, 8, Math.max(8, hostW - w - 8));
+                        y = this.clamp(hostH * 0.52 - h, 8, Math.max(8, hostH - h - 8));
+                        tailX = w * 0.48;
+                    }
+
+                    this.detailPopup.style.left = x + "px";
+                    this.detailPopup.style.top = y + "px";
+                    this.detailPopup.style.setProperty("--tail-x", tailX + "px");
+                },
+
+                hideDetailPopup: function () {
+                    if (this.detailPopup) this.detailPopup.classList.remove("visible");
+                },
+
+                loadOSMTexture: function () {
+                    var self = this;
+                    this.tileStats = { ok: 0, fail: 0 };
+                    var meta = this.computeTileMeta(this.center.lat, this.center.lng, this.zoom, this.tileSpan);
+                    this.mapMeta = meta;
+                    var style = this.getMapStyle();
+                    var textureScale = this.getTextureScale(style);
+                    this.mapTextureScale = textureScale;
+
+                    var canvas = document.createElement("canvas");
+                    canvas.width = Math.round(meta.width * textureScale);
+                    canvas.height = Math.round(meta.height * textureScale);
+                    var ctx = canvas.getContext("2d");
+                    ctx.setTransform(textureScale, 0, 0, textureScale, 0, 0);
+
+                    var jobs = [];
+                    for (var i = 0; i < meta.tiles.length; i++) {
+                        jobs.push(this.loadTile(meta, meta.tiles[i], ctx));
+                    }
+
+                    return Promise.all(jobs).then(function () {
+                        if (self.tileStats.ok === 0) {
+                            self.drawFallbackMap(ctx, meta.width, meta.height);
+                        }
+
+                        self.drawTextureOverlays(ctx, meta.width, meta.height, style);
+                        var registered = false;
+                        try {
+                            var dataUrl = canvas.toDataURL("image/png");
+                            ht.Default.setImage(self.mapTextureName, canvas.width, canvas.height, dataUrl);
+                            registered = true;
+                        }
+                        catch (ignore) {
+                        }
+                        if (!registered) {
+                            ht.Default.setImage(self.mapTextureName, canvas);
+                        }
+
+                        var floorW = meta.width * self.unitsPerPixel;
+                        var floorH = meta.height * self.unitsPerPixel;
+
+                        self.floorNode.s3([floorW, 4, floorH]);
+                        self.floorNode.s({
+                            "shape3d": "rect",
+                            "shape3d.color": "#1f2f3f",
+                            "shape3d.image": self.mapTextureName,
+                            "shape3d.top.color": "#f2f7fc",
+                            "shape3d.top.image": self.mapTextureName,
+                            "shape3d.top.visible": true,
+                            "shape3d.bottom.color": "#1a2631",
+                            "shape3d.light": false
+                        });
+
+                        if (self.tileStats.ok === 0) {
+                            self.status.textContent = style.name + " z" + self.zoom + " unavailable, fallback rendered";
+                        }
+                        else if (self.tileStats.fail > 0) {
+                            self.status.textContent = style.name + " z" + self.zoom + " partial (" + self.tileStats.ok + " ok / " + self.tileStats.fail + " failed, " + self.mapTextureScale + "x)";
+                        }
+                        else {
+                            self.status.textContent = style.name + " z" + self.zoom + " ready (" + self.tileStats.ok + " tiles, " + self.mapTextureScale + "x)";
+                        }
+                        self.updateMapMetaChip();
+                    });
+                },
+
+                getTextureScale: function (style) {
+                    if (!style || !style.retina) return 1;
+                    return window.devicePixelRatio && window.devicePixelRatio > 1 ? 2 : 1;
+                },
+
+                drawTextureOverlays: function (ctx, w, h, style) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = "multiply";
+                    ctx.fillStyle = (style && style.tint) || "rgba(23, 41, 58, 0.1)";
+                    ctx.fillRect(0, 0, w, h);
+
+                    ctx.globalCompositeOperation = "multiply";
+                    var vignette = ctx.createRadialGradient(w * 0.52, h * 0.54, w * 0.18, w * 0.52, h * 0.54, w * 0.72);
+                    vignette.addColorStop(0, "rgba(255, 255, 255, 0)");
+                    var isDark = !!(style && style.name && style.name.toLowerCase().indexOf("dark") >= 0);
+                    vignette.addColorStop(1, isDark ? "rgba(0, 0, 0, 0.03)" : "rgba(14, 25, 38, 0.1)");
+                    ctx.fillStyle = vignette;
+                    ctx.fillRect(0, 0, w, h);
+
+                    ctx.globalCompositeOperation = "source-over";
+                    var edge = ctx.createRadialGradient(w * 0.5, h * 0.5, w * 0.36, w * 0.5, h * 0.5, w * 0.72);
+                    edge.addColorStop(0, "rgba(0, 0, 0, 0)");
+                    edge.addColorStop(1, isDark ? "rgba(0, 0, 0, 0.02)" : "rgba(9, 18, 27, 0.08)");
+                    ctx.fillStyle = edge;
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.restore();
+                },
+
+                drawFallbackMap: function (ctx, w, h) {
+                    ctx.save();
+                    ctx.fillStyle = "#dce7f2";
+                    ctx.fillRect(0, 0, w, h);
+
+                    ctx.fillStyle = "rgba(166, 195, 157, 0.65)";
+                    ctx.fillRect(0, 0, w, h * 0.28);
+                    ctx.fillRect(0, h * 0.72, w, h * 0.28);
+
+                    ctx.strokeStyle = "rgba(120, 139, 158, 0.65)";
+                    ctx.lineWidth = 18;
+                    ctx.beginPath();
+                    ctx.moveTo(0, h * 0.54);
+                    ctx.lineTo(w, h * 0.46);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = "rgba(241, 248, 255, 0.95)";
+                    ctx.lineWidth = 6;
+                    for (var y = 70; y < h; y += 140) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(w, y);
+                        ctx.stroke();
+                    }
+                    for (var x = 70; x < w; x += 140) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, h);
+                        ctx.stroke();
+                    }
+
+                    ctx.fillStyle = "rgba(121, 169, 123, 0.52)";
+                    ctx.fillRect(w * 0.18, h * 0.18, w * 0.2, h * 0.16);
+                    ctx.fillRect(w * 0.62, h * 0.58, w * 0.2, h * 0.16);
+                    ctx.restore();
+                },
+
+                loadTile: function (meta, tile, ctx) {
+                    var self = this;
+                    var n = meta.n;
+                    var tx = this.mod(tile.tx, n);
+                    var ty = this.clamp(tile.ty, 0, n - 1);
+                    var url = this.buildTileUrl(meta.zoom, tx, ty, tile.localX, tile.localY);
+
+                    return new Promise(function (resolve) {
+                        var img = new Image();
+                        img.crossOrigin = "anonymous";
+                        img.onload = function () {
+                            ctx.drawImage(img, tile.drawX, tile.drawY, self.tileSize, self.tileSize);
+                            self.tileStats.ok += 1;
+                            resolve();
+                        };
+                        img.onerror = function () {
+                            ctx.fillStyle = "#dbe4ed";
+                            ctx.fillRect(tile.drawX, tile.drawY, self.tileSize, self.tileSize);
+                            self.tileStats.fail += 1;
+                            resolve();
+                        };
+                        img.src = url;
+                    });
+                },
+
+                computeTileMeta: function (lat, lng, zoom, span) {
+                    var centerTile = this.latLngToTile(lat, lng, zoom);
+                    var n = Math.pow(2, zoom);
+                    var width = span * this.tileSize;
+                    var height = span * this.tileSize;
+                    var centerWorldPxX = centerTile.x * this.tileSize;
+                    var centerWorldPxY = centerTile.y * this.tileSize;
+                    var worldPxLeft = centerWorldPxX - width / 2;
+                    var worldPxTop = centerWorldPxY - height / 2;
+                    var startX = Math.floor(worldPxLeft / this.tileSize);
+                    var startY = Math.floor(worldPxTop / this.tileSize);
+                    var endX = Math.floor((worldPxLeft + width - 1) / this.tileSize);
+                    var endY = Math.floor((worldPxTop + height - 1) / this.tileSize);
+                    var tiles = [];
+
+                    for (var ty = startY; ty <= endY; ty++) {
+                        for (var tx = startX; tx <= endX; tx++) {
+                            tiles.push({
+                                tx: tx,
+                                ty: ty,
+                                localX: tx - startX,
+                                localY: ty - startY,
+                                drawX: tx * this.tileSize - worldPxLeft,
+                                drawY: ty * this.tileSize - worldPxTop
+                            });
+                        }
+                    }
+
+                    return {
+                        zoom: zoom,
+                        n: n,
+                        span: span,
+                        width: width,
+                        height: height,
+                        centerTileX: centerTile.x,
+                        centerTileY: centerTile.y,
+                        startX: startX,
+                        startY: startY,
+                        endX: endX,
+                        endY: endY,
+                        tiles: tiles,
+                        worldPxLeft: worldPxLeft,
+                        worldPxTop: worldPxTop,
+                        centerWorldPxX: centerWorldPxX,
+                        centerWorldPxY: centerWorldPxY
+                    };
+                },
+
+                latLngToTile: function (lat, lng, zoom) {
+                    var n = Math.pow(2, zoom);
+                    var latRad = lat * Math.PI / 180;
+                    var x = (lng + 180) / 360 * n;
+                    var y = (1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n;
+                    return { x: x, y: y };
+                },
+
+                tileToLatLng: function (x, y, zoom) {
+                    var n = Math.pow(2, zoom);
+                    var lng = x / n * 360 - 180;
+                    var latRad = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / n)));
+                    var lat = latRad * 180 / Math.PI;
+                    return { lat: lat, lng: lng };
+                },
+
+                getMapStyle: function () {
+                    return this.mapStyles[this.currentMapStyle] || this.mapStyles.osm;
+                },
+
+                buildTileUrl: function (zoom, x, y, localX, localY) {
+                    var style = this.getMapStyle();
+                    var subdomains = style.subdomains || [];
+                    var subdomain = subdomains.length ? subdomains[(localX + localY) % subdomains.length] : "";
+                    var retinaToken = style.retina && this.getTextureScale(style) > 1 ? "@2x" : "";
+                    return style.url
+                        .replace("{s}", subdomain)
+                        .replace("{z}", String(zoom))
+                        .replace("{x}", String(x))
+                        .replace("{y}", String(y))
+                        .replace("{r}", retinaToken);
+                },
+
+                updateAttribution: function () {
+                    if (!this.attribution) return;
+                    this.attribution.innerHTML = this.getMapStyle().attribution;
+                },
+
+                updateMapMetaChip: function () {
+                    if (!this.mapMetaChip) return;
+                    var style = this.getMapStyle();
+                    var zoom = this.mapLoading ? this.zoom : (this.activeZoom || this.zoom);
+                    this.mapMetaChip.textContent = "Style: " + style.name + " · Zoom " + zoom;
+                    if (this.btnStyle) {
+                        this.btnStyle.textContent = "Map Style: " + style.name;
+                    }
+                },
+
+                cycleMapStyle: function () {
+                    var keys = Object.keys(this.mapStyles);
+                    var idx = keys.indexOf(this.currentMapStyle);
+                    this.currentMapStyle = keys[(idx + 1) % keys.length];
+                    this.updateAttribution();
+                    this.updateMapMetaChip();
+                    this.reloadMapForZoom(this.activeZoom || this.zoom, true);
+                },
+
+                getFallbackStyleKey: function () {
+                    if (this.currentMapStyle !== "osm" && this.mapStyles.osm) return "osm";
+                    return null;
+                },
+
+                computeSpanForZoom: function (zoom) {
+                    var span = Math.round(this.baseTileSpan * Math.pow(2, zoom - this.baseZoom));
+                    return this.clamp(span, this.minTileSpan, this.maxTileSpan);
+                },
+
+                computeUnitsPerPixelForZoom: function (zoom) {
+                    return this.baseUnitsPerPixel * Math.pow(2, this.baseZoom - zoom);
+                },
+
+                estimateZoomFromCamera: function () {
+                    if (!this.world3d) return this.zoom;
+                    var eye = this.world3d.getEye();
+                    var center = this.world3d.getCenter();
+                    var dx = eye[0] - center[0];
+                    var dy = eye[1] - center[1];
+                    var dz = eye[2] - center[2];
+                    var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                    if (dist > 4200) return this.minZoom;
+                    if (dist > 3300) return this.minZoom + 1;
+                    if (dist > 2550) return this.baseZoom;
+                    if (dist > 1750) return this.baseZoom + 1;
+                    return this.maxZoom;
+                },
+
+                bindWorldInteraction: function () {
+                    var self = this;
+                    var listener = function (e) {
+                        if (!e || !e.kind) return;
+                        if (e.kind === "endZoom" || e.kind === "endPinch" || e.kind === "endWalk" || e.kind === "endPan") {
+                            self.syncMapZoomWithCamera(false);
+                        }
+                    };
+                    if (this.world3d.addinteractorListener) {
+                        this.world3d.addinteractorListener(listener);
+                    }
+                    else if (this.world3d.addInteractorListener) {
+                        this.world3d.addInteractorListener(listener);
+                    }
+                },
+
+                startZoomMonitor: function () {
+                    var self = this;
+                    if (this.zoomMonitorTimer) {
+                        clearInterval(this.zoomMonitorTimer);
+                    }
+                    this.zoomMonitorTimer = setInterval(function () {
+                        self.syncMapZoomWithCamera(false);
+                    }, 900);
+                },
+
+                syncMapZoomWithCamera: function (force) {
+                    if (this.detailOpen || !this.mapMeta) return;
+                    var targetZoom = this.clamp(this.estimateZoomFromCamera(), this.minZoom, this.maxZoom);
+                    if (force) {
+                        this.zoomCandidate = null;
+                        this.zoomCandidateCount = 0;
+                        this.reloadMapForZoom(targetZoom, true);
+                        return;
+                    }
+                    if (this.activeZoom != null && Math.abs(targetZoom - this.activeZoom) > 1) {
+                        targetZoom = this.activeZoom + (targetZoom > this.activeZoom ? 1 : -1);
+                    }
+                    if (targetZoom === this.activeZoom) {
+                        this.zoomCandidate = null;
+                        this.zoomCandidateCount = 0;
+                        return;
+                    }
+                    if (targetZoom !== this.zoomCandidate) {
+                        this.zoomCandidate = targetZoom;
+                        this.zoomCandidateCount = 1;
+                        return;
+                    }
+                    this.zoomCandidateCount += 1;
+                    if (this.zoomCandidateCount < 3) return;
+                    this.zoomCandidate = null;
+                    this.zoomCandidateCount = 0;
+                    this.reloadMapForZoom(targetZoom, force);
+                },
+
+                reloadMapForZoom: function (targetZoom, force) {
+                    var self = this;
+                    targetZoom = this.clamp(targetZoom, this.minZoom, this.maxZoom);
+                    if (!force && this.mapMeta && this.activeZoom === targetZoom) {
+                        return Promise.resolve();
+                    }
+                    if (this.mapLoading) {
+                        this.pendingZoom = targetZoom;
+                        this.pendingForce = this.pendingForce || !!force;
+                        return Promise.resolve();
+                    }
+
+                    this.mapLoading = true;
+                    this.zoom = targetZoom;
+                    this.tileSpan = this.computeSpanForZoom(targetZoom);
+                    this.unitsPerPixel = this.computeUnitsPerPixelForZoom(targetZoom);
+                    this.status.textContent = "Loading " + this.getMapStyle().name + " z" + targetZoom + "...";
+                    this.updateMapMetaChip();
+
+                    var token = ++this.mapReloadToken;
+                    var done = function () {
+                        self.mapLoading = false;
+                        if (self.pendingZoom != null && (self.pendingZoom !== self.activeZoom || self.pendingForce)) {
+                            var next = self.pendingZoom;
+                            var nextForce = self.pendingForce;
+                            self.pendingZoom = null;
+                            self.pendingForce = false;
+                            self.reloadMapForZoom(next, nextForce);
+                        }
+                        else {
+                            self.pendingZoom = null;
+                            self.pendingForce = false;
+                        }
+                    };
+
+                    return this.loadOSMTexture().then(function () {
+                        if (token !== self.mapReloadToken) return;
+                        if (self.tileStats.ok === 0) {
+                            var fallbackStyle = self.getFallbackStyleKey();
+                            if (fallbackStyle) {
+                                self.currentMapStyle = fallbackStyle;
+                                self.updateAttribution();
+                                self.updateMapMetaChip();
+                                self.status.textContent = "No tiles loaded from selected source, trying " + self.getMapStyle().name + "...";
+                                return self.loadOSMTexture();
+                            }
+                        }
+                    }).then(function () {
+                        if (token !== self.mapReloadToken) return;
+                        self.activeZoom = targetZoom;
+                        if (self.buildings.length) {
+                            self.reprojectBuildingsToCurrentMap();
+                            self.updateDashboard();
+                        }
+                        self.world3d.invalidate();
+                    }).catch(function (err) {
+                        self.showBootError(err && err.message ? err.message : String(err));
+                        self.status.textContent = "Map refresh failed";
+                    }).then(done, done);
+                },
+
+                reprojectBuildingsToCurrentMap: function () {
+                    if (!this.mapMeta) return;
+                    for (var i = 0; i < this.buildings.length; i++) {
+                        var b = this.buildings[i];
+                        var tile = this.latLngToTile(b.lat, b.lng, this.mapMeta.zoom);
+                        var world = this.worldPxToWorldXZ(tile.x * this.tileSize, tile.y * this.tileSize);
+                        b.x = world.x;
+                        b.z = world.z;
+                        b.district = this.computeDistrict(b.x, b.z);
+                        this.updateBuildingGeometry(b);
+                    }
+                    if (this.selectedId && this.detailOpen) {
+                        this.prepareDetailScene(this.byId[this.selectedId]);
+                    }
+                },
+
+                worldPxToWorldXZ: function (pxX, pxY) {
+                    var dxPx = pxX - this.mapMeta.centerWorldPxX;
+                    var dyPx = pxY - this.mapMeta.centerWorldPxY;
+                    return {
+                        x: dxPx * this.unitsPerPixel,
+                        z: dyPx * this.unitsPerPixel
+                    };
+                },
+
+                updateBuildingGeometry: function (b) {
+                    var h = b.displayHeight || this.energyToHeight(b.energy);
+                    var fx = b.footX || b.foot;
+                    var fz = b.footZ || b.foot;
+                    b.displayHeight = h;
+                    b.node.p3([b.x, h / 2, b.z]);
+                    b.node.s3([fx, h, fz]);
+
+                    if (b.roofNode) {
+                        b.roofNode.p3([b.x, h + 3, b.z]);
+                        b.roofNode.s3([fx * 0.84, 6, fz * 0.84]);
+                    }
+                    if (b.wingNode) {
+                        var wingH = Math.max(24, h * 0.42);
+                        b.wingNode.p3([b.x + fx * 0.3, wingH / 2, b.z - fz * 0.52]);
+                        b.wingNode.s3([Math.max(4, fx * 0.16), wingH, Math.max(2, fz * 0.2)]);
+                    }
+                    if (b.crownNode) {
+                        b.crownNode.p3([b.x - fx * 0.24, h + 9, b.z + fz * 0.18]);
+                        b.crownNode.s3([Math.max(6, fx * 0.24), 8, Math.max(6, fz * 0.24)]);
+                    }
+                },
+
+                createBuildingDetailParts: function (b) {
+                    var roof = new ht.Node();
+                    roof.s({
+                        "shape3d": "box",
+                        "shape3d.color": this.brighten(b.baseColor, 0.34),
+                        "shape3d.top.color": this.brighten(b.baseColor, 0.48),
+                        "shape3d.light": true
+                    });
+                    roof.a("kind", "buildingPart");
+                    roof.a("buildingId", b.id);
+                    this.worldDM.add(roof);
+                    b.roofNode = roof;
+
+                    var wing = new ht.Node();
+                    wing.s({
+                        "shape3d": "box",
+                        "shape3d.color": this.blendColor(b.baseColor, "#dbe8f7", 0.24),
+                        "shape3d.light": true
+                    });
+                    wing.a("kind", "buildingPart");
+                    wing.a("buildingId", b.id);
+                    this.worldDM.add(wing);
+                    b.wingNode = wing;
+
+                    var crown = new ht.Node();
+                    crown.s({
+                        "shape3d": "box",
+                        "shape3d.color": this.blendColor(b.baseColor, "#ffffff", 0.52),
+                        "shape3d.light": true
+                    });
+                    crown.a("kind", "buildingPart");
+                    crown.a("buildingId", b.id);
+                    this.worldDM.add(crown);
+                    b.crownNode = crown;
+                },
+
+                createBuildings: function (count) {
+                    var types = [
+                        { name: "Residential", color: "#4f46e5" },
+                        { name: "Commercial", color: "#e67e22" },
+                        { name: "Public Utility", color: "#16a085" },
+                        { name: "Industrial", color: "#95a5a6" }
+                    ];
+
+                    var margin = 70;
+                    var i;
+                    for (i = 1; i <= count; i++) {
+                        var px = this.rand(margin, this.mapMeta.width - margin);
+                        var py = this.rand(margin, this.mapMeta.height - margin);
+
+                        var worldPxX = this.mapMeta.worldPxLeft + px;
+                        var worldPxY = this.mapMeta.worldPxTop + py;
+                        var tileX = worldPxX / this.tileSize;
+                        var tileY = worldPxY / this.tileSize;
+                        var ll = this.tileToLatLng(tileX, tileY, this.mapMeta.zoom);
+                        var world = this.worldPxToWorldXZ(worldPxX, worldPxY);
+
+                        var type = types[Math.floor(Math.random() * types.length)];
+                        var energy = Math.round(this.rand(30, 245));
+                        var occupancy = Math.round(this.rand(15, 98));
+                        var alarm = Math.random() < 0.14;
+                        var district = this.computeDistrict(world.x, world.z);
+
+                        var id = "BLD-" + this.pad(i, 3);
+                        var footX = this.rand(26, 46);
+                        var footZ = this.rand(24, 50);
+                        var foot = (footX + footZ) / 2;
+                        var height = this.energyToHeight(energy);
+
+                        var node = new ht.Node();
+                        node.setName(id);
+                        node.p3([world.x, height / 2, world.z]);
+                        node.s3([footX, height, footZ]);
+                        node.s({
+                            "shape3d": "box",
+                            "shape3d.color": type.color,
+                            "shape3d.light": true,
+                            "shape3d.top.color": this.brighten(type.color, 0.16),
+                            "wf.visible": false,
+                            "select.type": "shadow",
+                            "select.color": "#ffd166",
+                            "select.width": 4
+                        });
+                        node.a("kind", "building");
+                        node.a("buildingId", id);
+                        this.worldDM.add(node);
+
+                        var b = {
+                            id: id,
+                            lat: ll.lat,
+                            lng: ll.lng,
+                            x: world.x,
+                            z: world.z,
+                            district: district,
+                            type: type.name,
+                            baseColor: type.color,
+                            energy: energy,
+                            occupancy: occupancy,
+                            alarm: alarm,
+                            foot: foot,
+                            footX: footX,
+                            footZ: footZ,
+                            displayHeight: height,
+                            node: node
+                        };
+
+                        this.createBuildingDetailParts(b);
+                        this.updateBuildingGeometry(b);
+
+                        this.buildings.push(b);
+                        this.byId[id] = b;
+                    }
+                },
+
+                bindWorldSelection: function () {
+                    var self = this;
+                    var sm = this.worldDM.getSelectionModel();
+                    sm.setFilterFunc(function (data) {
+                        return data && (data.a("kind") === "building" || data.a("kind") === "buildingPart");
+                    });
+                    sm.addSelectionChangeListener(function () {
+                        var data = sm.getLastData();
+                        if (!data) {
+                            return;
+                        }
+                        var id = data.a("buildingId");
+                        if (id) {
+                            self.selectBuilding(id, true);
+                        }
+                    });
+                },
+
+                selectBuilding: function (id, openTransition) {
+                    var b = this.byId[id];
+                    if (!b) {
+                        return;
+                    }
+
+                    this.selectedId = id;
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    this.btnEnter.disabled = !perms.enterBuilding;
+
+                    for (var i = 0; i < this.buildings.length; i++) {
+                        var it = this.buildings[i];
+                        var isSel = it.id === id;
+                        var color = it.alarm ? this.blendColor(it.baseColor, "#d84a4a", 0.55) : it.baseColor;
+                        it.node.s("shape3d.color", color);
+                        it.node.s("wf.visible", isSel ? true : false);
+                        it.node.s("wf.color", isSel ? "#ffe07a" : "#000000");
+                        if (it.roofNode) {
+                            it.roofNode.s("shape3d.color", this.brighten(color, 0.32));
+                        }
+                        if (it.wingNode) {
+                            it.wingNode.s("shape3d.color", this.blendColor(color, "#dbe8f7", 0.24));
+                        }
+                        if (it.crownNode) {
+                            it.crownNode.s("shape3d.color", isSel ? "#ffe07a" : this.blendColor(color, "#ffffff", 0.5));
+                        }
+                    }
+
+                    this.updateSelectionPanel();
+                    if (openTransition && !this.detailOpen) {
+                        this.openDetailView(id);
+                    }
+                },
+
+                openDetailView: function (id) {
+                    var b = this.byId[id || this.selectedId];
+                    if (!b) {
+                        return;
+                    }
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    if (!perms.enterBuilding) {
+                        this.status.textContent = "RBAC: current role cannot open building detail view";
+                        return;
+                    }
+
+                    this.selectedId = b.id;
+                    this.detailOpen = true;
+                    this.btnBack.style.display = "";
+                    this.btnEnter.style.display = "none";
+                    this.hideDetailPopup();
+                    this.detailPopupAnchor = null;
+
+                    this.animateWorldFocus(b);
+                    this.prepareDetailScene(b);
+
+                    this.viewStack.classList.add("detail-mode");
+                    var self = this;
+                    setTimeout(function () {
+                        self.detail3d.invalidate();
+                        self.animateDetailIntro();
+                        self.showDetailPopup(b, {
+                            x: self.detailHost.clientWidth * 0.5,
+                            y: self.detailHost.clientHeight * 0.62
+                        });
+                    }, 40);
+                },
+
+                closeDetailView: function () {
+                    if (!this.detailOpen) {
+                        this.animateToCityHome();
+                        return;
+                    }
+
+                    this.detailOpen = false;
+                    this.viewStack.classList.remove("detail-mode");
+                    this.btnBack.style.display = "none";
+                    this.btnEnter.style.display = "";
+                    this.hideDetailPopup();
+                    this.detailPopupAnchor = null;
+                    this.animateToCityHome();
+
+                    var self = this;
+                    setTimeout(function () {
+                        self.world3d.invalidate();
+                    }, 60);
+                },
+
+                animateWorldFocus: function (b) {
+                    var h = b.displayHeight || this.energyToHeight(b.energy);
+                    var targetCenter = [b.x, h * 0.45, b.z];
+                    var targetEye = [b.x + 340, h + 300, b.z + 360];
+                    this.animateCamera(this.world3d, targetEye, targetCenter, 420);
+                },
+
+                animateToCityHome: function () {
+                    this.animateCamera(this.world3d, [0, 1900, 2200], [0, 0, 0], 520);
+                },
+
+                prepareDetailScene: function (b) {
+                    this.detailDM.clear();
+                    this.detailDM.add(this.detailFloor);
+
+                    var h = (b.displayHeight || this.energyToHeight(b.energy)) * 1.45;
+                    var footX = (b.footX || b.foot) * 2.05;
+                    var footZ = (b.footZ || b.foot) * 2.05;
+
+                    var focus = new ht.Node();
+                    focus.setName(b.id);
+                    focus.p3([0, h / 2, 0]);
+                    focus.s3([footX, h, footZ]);
+                    focus.s({
+                        "shape3d": "box",
+                        "shape3d.color": b.alarm ? this.blendColor(b.baseColor, "#d84a4a", 0.5) : b.baseColor,
+                        "shape3d.top.color": this.brighten(b.baseColor, 0.22),
+                        "shape3d.light": true,
+                        "wf.visible": true,
+                        "wf.color": "#ffe07a"
+                    });
+                    focus.a("kind", "detailBuilding");
+                    focus.a("buildingId", b.id);
+                    this.detailDM.add(focus);
+                    this.detailBuildingNode = focus;
+
+                    var podium = new ht.Node();
+                    var podiumH = Math.max(30, h * 0.24);
+                    podium.p3([0, podiumH / 2, 0]);
+                    podium.s3([footX * 1.22, podiumH, footZ * 1.22]);
+                    podium.s({
+                        "shape3d": "box",
+                        "shape3d.color": this.blendColor(b.baseColor, "#dbe8f7", 0.35),
+                        "shape3d.light": true
+                    });
+                    this.detailDM.add(podium);
+
+                    var roof = new ht.Node();
+                    roof.p3([0, h + 8, 0]);
+                    roof.s3([footX * 0.86, 10, footZ * 0.86]);
+                    roof.s({
+                        "shape3d": "box",
+                        "shape3d.color": this.brighten(b.baseColor, 0.34),
+                        "shape3d.top.color": this.brighten(b.baseColor, 0.5),
+                        "shape3d.light": true
+                    });
+                    this.detailDM.add(roof);
+
+                    var mech = new ht.Node();
+                    mech.p3([footX * 0.18, h + 19, -footZ * 0.12]);
+                    mech.s3([Math.max(16, footX * 0.24), 10, Math.max(16, footZ * 0.24)]);
+                    mech.s({
+                        "shape3d": "box",
+                        "shape3d.color": this.blendColor(b.baseColor, "#ffffff", 0.56),
+                        "shape3d.light": true
+                    });
+                    this.detailDM.add(mech);
+
+                    var halo = new ht.Node();
+                    halo.p3([0, h + 16, 0]);
+                    halo.s3([footX * 1.08, 6, footZ * 1.08]);
+                    halo.s({
+                        "shape3d": "box",
+                        "shape3d.color": "rgba(255, 224, 122, 0.65)",
+                        "shape3d.transparent": true,
+                        "shape3d.light": false
+                    });
+                    this.detailDM.add(halo);
+                },
+
+                animateDetailIntro: function () {
+                    this.detail3d.setEye([760, 520, 760]);
+                    this.detail3d.setCenter([0, 130, 0]);
+                    this.animateCamera(this.detail3d, [260, 230, 300], [0, 130, 0], 620);
+                },
+
+                animateCamera: function (g3d, targetEye, targetCenter, duration) {
+                    var fromEye = g3d.getEye();
+                    var fromCenter = g3d.getCenter();
+                    var start = performance.now();
+
+                    function ease(t) {
+                        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                    }
+
+                    function step(now) {
+                        var p = (now - start) / duration;
+                        if (p > 1) p = 1;
+                        var e = ease(p);
+
+                        g3d.setEye([
+                            fromEye[0] + (targetEye[0] - fromEye[0]) * e,
+                            fromEye[1] + (targetEye[1] - fromEye[1]) * e,
+                            fromEye[2] + (targetEye[2] - fromEye[2]) * e
+                        ]);
+                        g3d.setCenter([
+                            fromCenter[0] + (targetCenter[0] - fromCenter[0]) * e,
+                            fromCenter[1] + (targetCenter[1] - fromCenter[1]) * e,
+                            fromCenter[2] + (targetCenter[2] - fromCenter[2]) * e
+                        ]);
+
+                        if (p < 1) {
+                            requestAnimationFrame(step);
+                        }
+                    }
+
+                    requestAnimationFrame(step);
+                },
+
+                startTelemetry: function () {
+                    var self = this;
+                    this.telemetryTimer = setInterval(function () {
+                        self.tickBuildings();
+                        self.updateDashboard();
+                    }, 2200);
+                },
+
+                tickBuildings: function () {
+                    var i;
+                    for (i = 0; i < this.buildings.length; i++) {
+                        var b = this.buildings[i];
+                        b.energy = this.clamp(b.energy + this.randInt(-14, 14), 24, 260);
+                        b.occupancy = this.clamp(b.occupancy + this.randInt(-7, 7), 6, 100);
+                        b.alarm = (b.energy > 228 || b.occupancy > 91) ? Math.random() > 0.35 : Math.random() < 0.07;
+                        if (this.animateBuildingHeights) {
+                            b.displayHeight = this.energyToHeight(b.energy);
+                        }
+                        this.updateBuildingGeometry(b);
+                    }
+
+                    if (this.selectedId) {
+                        var selected = this.byId[this.selectedId];
+                        if (selected && this.detailOpen) {
+                            this.prepareDetailScene(selected);
+                        }
+                        this.selectBuilding(this.selectedId, false);
+                    }
+                },
+
+                buildDistrictBars: function () {
+                    var districts = ["North", "East", "Central", "South"];
+                    var i;
+                    this.districtBars.innerHTML = "";
+                    for (i = 0; i < districts.length; i++) {
+                        var d = districts[i];
+                        var row = document.createElement("div");
+                        row.className = "bar-row";
+                        row.innerHTML =
+                            '<div class="bar-head"><span>' + d + '</span><span id="district-val-' + d + '">0%</span></div>' +
+                            '<div class="bar-track"><span class="bar-fill" id="district-fill-' + d + '"></span></div>';
+                        this.districtBars.appendChild(row);
+
+                        this.districtBarEls[d] = {
+                            val: document.getElementById("district-val-" + d),
+                            fill: document.getElementById("district-fill-" + d)
+                        };
+                    }
+                },
+
+                updateDashboard: function () {
+                    var totalEnergy = 0;
+                    var totalOcc = 0;
+                    var alerts = 0;
+                    var districtEnergy = { North: 0, East: 0, Central: 0, South: 0 };
+                    var districtCount = { North: 0, East: 0, Central: 0, South: 0 };
+
+                    var i;
+                    for (i = 0; i < this.buildings.length; i++) {
+                        var b = this.buildings[i];
+                        totalEnergy += b.energy;
+                        totalOcc += b.occupancy;
+                        districtEnergy[b.district] += b.energy;
+                        districtCount[b.district] += 1;
+                        if (b.alarm || b.energy > 228 || b.occupancy > 91) alerts += 1;
+                    }
+
+                    this.kpiBuildings.textContent = String(this.buildings.length);
+                    this.kpiLoad.textContent = (totalEnergy / 10).toFixed(1);
+                    this.kpiOccupancy.textContent = (totalOcc / this.buildings.length).toFixed(0) + "%";
+                    this.kpiAlerts.textContent = String(alerts);
+
+                    var districts = ["North", "East", "Central", "South"];
+                    for (i = 0; i < districts.length; i++) {
+                        var d = districts[i];
+                        var avg = districtCount[d] ? districtEnergy[d] / districtCount[d] : 0;
+                        var pct = this.clamp(Math.round((avg / 260) * 100), 0, 100);
+                        this.districtBarEls[d].val.textContent = pct + "%";
+                        this.districtBarEls[d].fill.style.width = pct + "%";
+                    }
+
+                    this.updateAlerts();
+                    this.updateSelectionPanel();
+                },
+
+                updateSelectionPanel: function () {
+                    var b = this.selectedId ? this.byId[this.selectedId] : null;
+                    if (!b) {
+                        this.selectedName.textContent = "No building selected";
+                        this.metaDistrict.textContent = "-";
+                        this.metaType.textContent = "-";
+                        this.metaEnergy.textContent = "-";
+                        this.metaOccupancy.textContent = "-";
+                        return;
+                    }
+
+                    this.selectedName.textContent = b.id;
+                    this.metaDistrict.textContent = b.district;
+                    this.metaType.textContent = b.type;
+                    this.metaEnergy.textContent = b.energy + " kWh";
+                    this.metaOccupancy.textContent = b.occupancy + "%";
+                },
+
+                updateAlerts: function () {
+                    var top = this.buildings.slice().sort(function (a, b) {
+                        return (b.occupancy + b.energy / 8 + (b.alarm ? 30 : 0)) -
+                            (a.occupancy + a.energy / 8 + (a.alarm ? 30 : 0));
+                    }).slice(0, 6);
+
+                    this.alertList.innerHTML = "";
+                    if (this.alertListContrast) this.alertListContrast.innerHTML = "";
+                    var critical = 0;
+                    var watch = 0;
+                    var i;
+                    for (i = 0; i < top.length; i++) {
+                        var b = top[i];
+                        var tags = [];
+                        if (b.alarm) tags.push("sensor anomaly");
+                        if (b.occupancy > 91) tags.push("high occupancy");
+                        if (b.energy > 228) tags.push("energy spike");
+                        if (!tags.length) tags.push("watch");
+
+                        var li = document.createElement("li");
+                        li.textContent = b.id + " - " + b.district + " - " + tags.join(", ");
+                        this.alertList.appendChild(li);
+
+                        var severity = (b.alarm || b.occupancy > 94 || b.energy > 238) ? "critical" : "watch";
+                        if (severity === "critical") critical += 1;
+                        else watch += 1;
+
+                        if (this.alertListContrast) {
+                            var li2 = document.createElement("li");
+                            li2.className = "alert-item " + severity;
+                            li2.innerHTML =
+                                '<span class="alert-badge ' + severity + '">' + severity.toUpperCase() + '</span>' +
+                                '<span class="alert-text">' + b.id + " - " + b.district + " - " + tags.join(", ") + "</span>";
+                            this.alertListContrast.appendChild(li2);
+                        }
+                    }
+                    if (this.alertCriticalCount) this.alertCriticalCount.textContent = String(critical);
+                    if (this.alertWatchCount) this.alertWatchCount.textContent = String(watch);
+                },
+
+                computeDistrict: function (x, z) {
+                    if (x < 0 && z < 0) return "North";
+                    if (x >= 0 && z < 0) return "East";
+                    if (x < 0 && z >= 0) return "Central";
+                    return "South";
+                },
+
+                energyToHeight: function (energy) {
+                    return 34 + energy * 1.45;
+                },
+
+                brighten: function (hex, factor) {
+                    return this.blendColor(hex, "#ffffff", factor);
+                },
+
+                blendColor: function (hexA, hexB, t) {
+                    var a = this.hexToRgb(hexA);
+                    var b = this.hexToRgb(hexB);
+                    var r = Math.round(a.r + (b.r - a.r) * t);
+                    var g = Math.round(a.g + (b.g - a.g) * t);
+                    var b2 = Math.round(a.b + (b.b - a.b) * t);
+                    return "rgb(" + r + "," + g + "," + b2 + ")";
+                },
+
+                hexToRgb: function (hex) {
+                    var s = hex.replace("#", "");
+                    if (s.length === 3) {
+                        s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+                    }
+                    return {
+                        r: parseInt(s.slice(0, 2), 16),
+                        g: parseInt(s.slice(2, 4), 16),
+                        b: parseInt(s.slice(4, 6), 16)
+                    };
+                },
+
+                rand: function (min, max) {
+                    return min + Math.random() * (max - min);
+                },
+
+                randInt: function (min, max) {
+                    return Math.floor(this.rand(min, max + 1));
+                },
+
+                clamp: function (v, min, max) {
+                    return Math.max(min, Math.min(max, v));
+                },
+
+                mod: function (v, n) {
+                    return ((v % n) + n) % n;
+                },
+
+                pad: function (n, width) {
+                    var s = String(n);
+                    while (s.length < width) s = "0" + s;
+                    return s;
+                }
+            };
+
+            window.addEventListener("load", function () {
+                try {
+                    app.init();
+                }
+                catch (err) {
+                    app.showBootError(err && err.message ? err.message : String(err));
+                    if (window.console && console.error) console.error(err);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
