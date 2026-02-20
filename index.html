@@ -13,6 +13,9 @@
             --muted: #5f6f80;
             --accent: #1876c8;
             --danger: #d84a4a;
+            --left-rail-w: 214px;
+            --right-panel-w: 390px;
+            --topbar-h: 58px;
         }
 
         * {
@@ -48,8 +51,8 @@
             position: absolute;
             top: 14px;
             left: 14px;
-            right: 420px;
-            z-index: 60;
+            right: 14px;
+            z-index: 100;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
@@ -60,6 +63,27 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             padding: 8px 10px;
+            overflow: hidden;
+            white-space: normal;
+            min-height: 54px;
+        }
+
+        .topbar > * {
+            flex: 0 0 auto;
+        }
+
+        .topbar.collapsed > * {
+            display: none;
+        }
+
+        .topbar.collapsed #btn-topbar-toggle,
+        .topbar.collapsed #status {
+            display: inline-flex;
+        }
+
+        .topbar.collapsed {
+            min-height: 42px;
+            padding: 6px 10px;
         }
 
         .chip {
@@ -92,10 +116,19 @@
             color: #fff;
         }
 
+        .btn.toggle-on {
+            border-color: #7fd8b2;
+            background: rgba(35, 148, 111, 0.88);
+            color: #f5fffb;
+        }
+
         #status {
-            margin-left: auto;
+            margin-left: 0;
             font-size: 12px;
             color: #d0deed;
+            white-space: nowrap;
+            flex: 1 1 220px;
+            text-align: right;
         }
 
         #boot-error {
@@ -155,8 +188,8 @@
 
         .tag {
             position: absolute;
-            top: 88px;
-            left: 14px;
+            top: calc(14px + var(--topbar-h) + 10px);
+            left: calc(14px + var(--left-rail-w));
             z-index: 20;
             border: 1px solid rgba(204, 216, 228, 0.55);
             border-radius: 8px;
@@ -168,7 +201,7 @@
 
         .attribution {
             position: absolute;
-            left: 14px;
+            left: calc(14px + var(--left-rail-w));
             bottom: 14px;
             z-index: 20;
             border: 1px solid rgba(204, 216, 228, 0.55);
@@ -184,18 +217,160 @@
             text-decoration: none;
         }
 
+        .alert-rail {
+            position: absolute;
+            left: 14px;
+            top: calc(14px + var(--topbar-h) + 10px);
+            bottom: 14px;
+            width: var(--left-rail-w);
+            z-index: 30;
+            border-radius: 12px;
+            border: 1px solid rgba(204, 224, 246, 0.42);
+            background: rgba(14, 31, 45, 0.34);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: #f5f9ff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .alert-rail-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 10px 8px;
+            border-bottom: 1px solid rgba(211, 228, 244, 0.24);
+            font-size: 11px;
+            letter-spacing: 0.08em;
+            font-weight: 800;
+            color: #eff7ff;
+            background: rgba(173, 201, 231, 0.08);
+        }
+
+        .alert-rail-list {
+            list-style: none;
+            margin: 0;
+            padding: 8px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .alert-rail-item {
+            border-radius: 8px;
+            border: 1px solid rgba(202, 222, 243, 0.32);
+            background: rgba(234, 245, 255, 0.09);
+            padding: 7px;
+            color: #f6fbff;
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .alert-rail-item.critical {
+            border-color: rgba(255, 149, 149, 0.62);
+            background: rgba(165, 40, 40, 0.26);
+        }
+
+        .alert-rail-item.watch {
+            border-color: rgba(255, 217, 153, 0.52);
+            background: rgba(145, 96, 28, 0.2);
+        }
+
+        .alert-rail-badge {
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 3px 6px;
+            margin-right: 5px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .alert-rail-item.watch .alert-rail-badge {
+            background: rgba(255, 193, 89, 0.35);
+        }
+
+        .alert-rail-item.critical .alert-rail-badge {
+            background: rgba(255, 124, 124, 0.42);
+        }
+
         .right {
             position: absolute;
             right: 14px;
-            top: 14px;
+            top: calc(14px + var(--topbar-h) + 10px);
             bottom: 14px;
-            width: 390px;
+            width: var(--right-panel-w);
             z-index: 70;
             overflow: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
             padding: 2px;
+        }
+
+        .right-resizer {
+            position: absolute;
+            left: -6px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            cursor: ew-resize;
+            z-index: 85;
+        }
+
+        .left-resizer {
+            position: absolute;
+            right: -6px;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            cursor: ew-resize;
+            z-index: 85;
+        }
+
+        .panel-collapse-btn {
+            border: 1px solid rgba(197, 216, 238, 0.52);
+            background: rgba(198, 221, 246, 0.14);
+            color: #e9f3ff;
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .side-tab {
+            position: absolute;
+            z-index: 95;
+            border: 1px solid rgba(197, 216, 238, 0.56);
+            background: rgba(16, 33, 50, 0.65);
+            color: #edf6ff;
+            border-radius: 10px;
+            padding: 7px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .side-tab.left {
+            left: 22px;
+            top: calc(14px + var(--topbar-h) + 10px);
+        }
+
+        .side-tab.right {
+            right: 22px;
+            top: calc(14px + var(--topbar-h) + 10px);
+        }
+
+        .app.left-collapsed .side-tab.left,
+        .app.right-collapsed .side-tab.right {
+            display: inline-flex;
         }
 
         .card {
@@ -561,9 +736,78 @@
             padding: 6px;
         }
 
+        .center-modal {
+            position: absolute;
+            inset: 0;
+            z-index: 120;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(7, 16, 27, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .center-modal.visible {
+            display: flex;
+        }
+
+        .center-modal-card {
+            width: min(460px, calc(100% - 28px));
+            border: 1px solid rgba(198, 217, 239, 0.52);
+            border-radius: 14px;
+            background: rgba(18, 34, 50, 0.9);
+            box-shadow: 0 18px 40px rgba(4, 10, 18, 0.45);
+            padding: 14px;
+            color: #ecf6ff;
+        }
+
+        .center-modal-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .center-modal-hint {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #c8def4;
+        }
+
+        .center-modal-input {
+            width: 100%;
+            margin-top: 10px;
+            border: 1px solid rgba(191, 213, 236, 0.48);
+            border-radius: 9px;
+            background: rgba(223, 240, 255, 0.12);
+            color: #f3f9ff;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        .center-modal-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
         @media (max-width: 980px) {
+            :root {
+                --left-rail-w: 0px;
+                --right-panel-w: 0px;
+            }
+            .alert-rail {
+                display: none;
+            }
+            .side-tab,
+            .right-resizer,
+            .left-resizer {
+                display: none !important;
+            }
             .topbar {
                 right: 14px;
+                left: 14px;
             }
             .right {
                 width: calc(100% - 28px);
@@ -577,16 +821,33 @@
     <div class="app">
         <section class="left">
             <div class="topbar">
+                <button class="btn" id="btn-topbar-toggle">Collapse Top Bar</button>
                 <span class="chip">Digital Twin: map texture integrated in 3D world</span>
                 <button class="btn" id="btn-city-view">3D City View</button>
                 <button class="btn" id="btn-style">Map Style</button>
+                <button class="btn" id="btn-center">Set Map Center</button>
+                <button class="btn" id="btn-import-asset">Import Asset</button>
+                <button class="btn" id="btn-road-draw">Road Path: Off</button>
+                <button class="btn" id="btn-edit-layout">Edit Layout: Off</button>
+                <button class="btn toggle-on" id="btn-routes">Routes: On</button>
                 <button class="btn primary" id="btn-enter-detail" disabled>Enter Building View</button>
                 <button class="btn" id="btn-back" style="display:none;">Back To 3D World</button>
                 <button class="btn" id="btn-user">User Settings</button>
                 <span class="chip" id="map-meta-chip">Style: Carto Dark · Zoom 16</span>
+                <span class="chip" id="center-chip">Center: 40.7128, -74.0060</span>
+                <span class="chip" id="road-chip">Road Draw: Off</span>
                 <span id="status">Loading map tiles...</span>
                 <div id="boot-error"></div>
             </div>
+
+            <aside class="alert-rail" id="left-alert-rail">
+                <div class="alert-rail-head">
+                    <span>LIVE ALERT FEED</span>
+                    <button class="panel-collapse-btn" id="btn-left-collapse">Hide Alerts</button>
+                </div>
+                <ul class="alert-rail-list" id="left-alert-list"></ul>
+                <div class="left-resizer" id="left-resizer"></div>
+            </aside>
 
             <div id="view-stack">
                 <div id="world-pane" class="view-pane">
@@ -608,7 +869,8 @@
             </div>
         </section>
 
-        <aside class="right">
+        <aside class="right" id="right-panel">
+            <div class="right-resizer" id="right-resizer"></div>
             <section class="card">
                 <div class="user-row">
                     <div class="avatar">SC</div>
@@ -616,6 +878,7 @@
                         <div class="title" style="font-size:16px; margin:0;">John Doe</div>
                         <div class="muted" id="role-caption">Role: Operator</div>
                     </div>
+                    <button class="panel-collapse-btn" id="btn-right-collapse">Hide Dashboard</button>
                 </div>
                 <select class="role-select" id="role-select">
                     <option value="Viewer">Viewer</option>
@@ -658,7 +921,7 @@
                     </div>
                 </section>
 
-                <section class="card" style="flex:1; min-height:170px;">
+                <section class="card" style="flex:1; min-height:170px; display:none;">
                     <h2 class="title" style="font-size:16px;">Priority Alerts</h2>
                     <ul id="alert-list"></ul>
                 </section>
@@ -676,6 +939,20 @@
                 </section>
             </div>
         </aside>
+        <button class="side-tab left" id="btn-left-show">Show Alerts</button>
+        <button class="side-tab right" id="btn-right-show">Show Dashboard</button>
+    </div>
+
+    <div class="center-modal" id="center-modal">
+        <div class="center-modal-card" role="dialog" aria-modal="true" aria-labelledby="center-modal-title">
+            <h3 class="center-modal-title" id="center-modal-title">Set Base Map Center</h3>
+            <div class="center-modal-hint">Paste `latitude,longitude` or `latitude longitude` and click Apply.</div>
+            <input id="center-input" class="center-modal-input" type="text" spellcheck="false" autocomplete="off" />
+            <div class="center-modal-actions">
+                <button class="btn" id="btn-center-cancel">Cancel</button>
+                <button class="btn primary" id="btn-center-apply">Apply Center</button>
+            </div>
+        </div>
     </div>
 
     <script src="ht.js"></script>
@@ -747,14 +1024,30 @@
                 floorNode: null,
                 detailFloor: null,
                 detailBuildingNode: null,
+                routeNodes: [],
+                junctionRoadNodes: [],
+                customRoadNodes: [],
+                draftRoadNodes: [],
 
                 buildings: [],
                 byId: {},
+                junctions: [],
+                junctionById: {},
+                importedAssets: [],
+                assetCounter: 0,
+                customRoadPaths: [],
+                customRoadCounter: 0,
+                roadDrawMode: false,
+                drawingRoadPoints: [],
                 selectedId: null,
                 detailOpen: false,
                 telemetryTimer: null,
                 suppressSelectionTransition: false,
                 animateBuildingHeights: false,
+                editMode: false,
+                routesVisible: true,
+                editSyncTimer: null,
+                routeRebuildTimer: null,
 
                 mapMeta: null,
                 districtBarEls: {},
@@ -769,6 +1062,15 @@
                 zoomCandidate: null,
                 zoomCandidateCount: 0,
                 detailPopupAnchor: null,
+                leftRailWidth: 214,
+                rightPanelWidth: 390,
+                collapsedRailGutter: 44,
+                leftPanelCollapsed: false,
+                rightPanelCollapsed: false,
+                topbarCollapsed: false,
+                activeResize: null,
+                resizeMoveHandler: null,
+                resizeUpHandler: null,
 
                 currentRole: "Operator",
                 rolePermissions: {
@@ -776,25 +1078,29 @@
                         enterBuilding: false,
                         styleSwitch: false,
                         detailPopup: true,
-                        alertConsole: false
+                        alertConsole: false,
+                        editLayout: false
                     },
                     Operator: {
                         enterBuilding: true,
                         styleSwitch: true,
                         detailPopup: true,
-                        alertConsole: true
+                        alertConsole: true,
+                        editLayout: true
                     },
                     Admin: {
                         enterBuilding: true,
                         styleSwitch: true,
                         detailPopup: true,
-                        alertConsole: true
+                        alertConsole: true,
+                        editLayout: true
                     }
                 },
 
                 init: function () {
                     this.cacheDom();
                     this.bindButtons();
+                    this.initLayoutControls();
                     if (!window.ht || !window.ht.graph3d || !window.ht.graph3d.Graph3dView) {
                         this.showBootError("HT Graph3dView runtime not available.");
                         return;
@@ -807,12 +1113,16 @@
                     this.bindResize();
                     this.updateAttribution();
                     this.updateMapMetaChip();
+                    this.updateCenterChip();
+                    this.updateRoadDrawUi();
                     this.applyRole(this.currentRole);
                     this.openPanelTab("dashboard");
 
                     this.reloadMapForZoom(this.zoom, true).then(function () {
                         app.activeZoom = app.zoom;
                         app.createBuildings(48);
+                        app.createRoadJunctions(18);
+                        app.rebuildNetworks();
                         app.bindWorldSelection();
                         app.bindWorldInteraction();
                         app.startZoomMonitor();
@@ -826,14 +1136,32 @@
                 },
 
                 cacheDom: function () {
+                    this.appRoot = document.querySelector(".app");
+                    this.topbar = document.querySelector(".topbar");
+                    this.rightPanel = document.getElementById("right-panel");
+                    this.leftAlertRail = document.getElementById("left-alert-rail");
+                    this.btnTopbarToggle = document.getElementById("btn-topbar-toggle");
+                    this.btnLeftCollapse = document.getElementById("btn-left-collapse");
+                    this.btnRightCollapse = document.getElementById("btn-right-collapse");
+                    this.btnLeftShow = document.getElementById("btn-left-show");
+                    this.btnRightShow = document.getElementById("btn-right-show");
+                    this.leftResizer = document.getElementById("left-resizer");
+                    this.rightResizer = document.getElementById("right-resizer");
                     this.viewStack = document.getElementById("view-stack");
                     this.detailHost = document.getElementById("detail-host");
                     this.btnCity = document.getElementById("btn-city-view");
                     this.btnStyle = document.getElementById("btn-style");
+                    this.btnCenter = document.getElementById("btn-center");
+                    this.btnImport = document.getElementById("btn-import-asset");
+                    this.btnRoadDraw = document.getElementById("btn-road-draw");
+                    this.btnEdit = document.getElementById("btn-edit-layout");
+                    this.btnRoutes = document.getElementById("btn-routes");
                     this.btnEnter = document.getElementById("btn-enter-detail");
                     this.btnBack = document.getElementById("btn-back");
                     this.btnUser = document.getElementById("btn-user");
                     this.mapMetaChip = document.getElementById("map-meta-chip");
+                    this.centerChip = document.getElementById("center-chip");
+                    this.roadChip = document.getElementById("road-chip");
                     this.status = document.getElementById("status");
                     this.bootError = document.getElementById("boot-error");
                     this.attribution = document.getElementById("attribution");
@@ -845,12 +1173,17 @@
                     this.dashboardPane = document.getElementById("dashboard-pane");
                     this.alertsPane = document.getElementById("alerts-pane");
                     this.alertListContrast = document.getElementById("alert-list-contrast");
+                    this.leftAlertList = document.getElementById("left-alert-list");
                     this.alertCriticalCount = document.getElementById("alert-critical-count");
                     this.alertWatchCount = document.getElementById("alert-watch-count");
                     this.detailPopup = document.getElementById("detail-popup");
                     this.detailPopupTitle = document.getElementById("detail-popup-title");
                     this.detailPopupBody = document.getElementById("detail-popup-body");
                     this.detailPopupClose = document.getElementById("detail-popup-close");
+                    this.centerModal = document.getElementById("center-modal");
+                    this.centerInput = document.getElementById("center-input");
+                    this.btnCenterApply = document.getElementById("btn-center-apply");
+                    this.btnCenterCancel = document.getElementById("btn-center-cancel");
 
                     this.kpiBuildings = document.getElementById("kpi-buildings");
                     this.kpiLoad = document.getElementById("kpi-load");
@@ -874,6 +1207,42 @@
                     });
                     this.btnStyle.addEventListener("click", function () {
                         self.cycleMapStyle();
+                    });
+                    this.btnCenter.addEventListener("click", function () {
+                        self.promptMapCenter();
+                    });
+                    this.btnImport.addEventListener("click", function () {
+                        self.promptImportAsset();
+                    });
+                    this.btnRoadDraw.addEventListener("click", function () {
+                        self.toggleRoadDrawMode();
+                    });
+                    this.btnTopbarToggle.addEventListener("click", function () {
+                        self.setTopbarCollapsed(!self.topbarCollapsed);
+                    });
+                    this.btnLeftCollapse.addEventListener("click", function () {
+                        self.setLeftPanelCollapsed(true);
+                    });
+                    this.btnRightCollapse.addEventListener("click", function () {
+                        self.setRightPanelCollapsed(true);
+                    });
+                    this.btnLeftShow.addEventListener("click", function () {
+                        self.setLeftPanelCollapsed(false);
+                    });
+                    this.btnRightShow.addEventListener("click", function () {
+                        self.setRightPanelCollapsed(false);
+                    });
+                    this.leftResizer.addEventListener("mousedown", function (e) {
+                        self.startSidebarResize("left", e);
+                    });
+                    this.rightResizer.addEventListener("mousedown", function (e) {
+                        self.startSidebarResize("right", e);
+                    });
+                    this.btnEdit.addEventListener("click", function () {
+                        self.setEditMode(!self.editMode);
+                    });
+                    this.btnRoutes.addEventListener("click", function () {
+                        self.toggleRoutes();
                     });
                     this.btnEnter.addEventListener("click", function () {
                         if (self.selectedId) {
@@ -899,6 +1268,124 @@
                     this.detailPopupClose.addEventListener("click", function () {
                         self.hideDetailPopup();
                     });
+                    this.btnCenterApply.addEventListener("click", function () {
+                        self.applyCenterFromInput();
+                    });
+                    this.btnCenterCancel.addEventListener("click", function () {
+                        self.closeCenterModal();
+                    });
+                    this.centerInput.addEventListener("keydown", function (e) {
+                        if (e.key === "Enter") {
+                            self.applyCenterFromInput();
+                        }
+                        else if (e.key === "Escape") {
+                            self.closeCenterModal();
+                        }
+                    });
+                    this.centerModal.addEventListener("click", function (e) {
+                        if (e.target === self.centerModal) {
+                            self.closeCenterModal();
+                        }
+                    });
+                },
+
+                initLayoutControls: function () {
+                    this.applyLayout();
+                },
+
+                setTopbarCollapsed: function (collapsed) {
+                    this.topbarCollapsed = !!collapsed;
+                    this.applyLayout();
+                },
+
+                setLeftPanelCollapsed: function (collapsed) {
+                    this.leftPanelCollapsed = !!collapsed;
+                    this.applyLayout();
+                },
+
+                setRightPanelCollapsed: function (collapsed) {
+                    this.rightPanelCollapsed = !!collapsed;
+                    this.applyLayout();
+                },
+
+                startSidebarResize: function (side, e) {
+                    if (!e || e.button !== 0) return;
+                    if (side === "left" && this.leftPanelCollapsed) return;
+                    if (side === "right" && this.rightPanelCollapsed) return;
+                    e.preventDefault();
+                    var self = this;
+                    this.activeResize = {
+                        side: side,
+                        startX: e.clientX,
+                        leftWidth: this.leftRailWidth,
+                        rightWidth: this.rightPanelWidth
+                    };
+                    this.resizeMoveHandler = function (ev) {
+                        self.onSidebarResizeMove(ev);
+                    };
+                    this.resizeUpHandler = function () {
+                        self.stopSidebarResize();
+                    };
+                    document.body.style.cursor = "ew-resize";
+                    document.addEventListener("mousemove", this.resizeMoveHandler);
+                    document.addEventListener("mouseup", this.resizeUpHandler);
+                },
+
+                onSidebarResizeMove: function (e) {
+                    if (!this.activeResize) return;
+                    var dx = e.clientX - this.activeResize.startX;
+                    if (this.activeResize.side === "left") {
+                        this.leftRailWidth = this.clamp(Math.round(this.activeResize.leftWidth + dx), 160, 420);
+                        this.leftPanelCollapsed = false;
+                    }
+                    else {
+                        this.rightPanelWidth = this.clamp(Math.round(this.activeResize.rightWidth - dx), 280, 620);
+                        this.rightPanelCollapsed = false;
+                    }
+                    this.applyLayout();
+                },
+
+                stopSidebarResize: function () {
+                    this.activeResize = null;
+                    if (this.resizeMoveHandler) {
+                        document.removeEventListener("mousemove", this.resizeMoveHandler);
+                        this.resizeMoveHandler = null;
+                    }
+                    if (this.resizeUpHandler) {
+                        document.removeEventListener("mouseup", this.resizeUpHandler);
+                        this.resizeUpHandler = null;
+                    }
+                    document.body.style.cursor = "";
+                },
+
+                applyLayout: function () {
+                    var compact = window.innerWidth <= 980;
+                    var leftW = compact ? 0 : (this.leftPanelCollapsed ? this.collapsedRailGutter : this.leftRailWidth);
+                    var rightW = compact ? 0 : (this.rightPanelCollapsed ? this.collapsedRailGutter : this.rightPanelWidth);
+                    document.documentElement.style.setProperty("--left-rail-w", leftW + "px");
+                    document.documentElement.style.setProperty("--right-panel-w", rightW + "px");
+
+                    if (this.topbar) {
+                        this.topbar.classList.toggle("collapsed", this.topbarCollapsed);
+                    }
+                    if (this.btnTopbarToggle) {
+                        this.btnTopbarToggle.textContent = this.topbarCollapsed ? "Expand Top Bar" : "Collapse Top Bar";
+                    }
+                    if (this.leftAlertRail) {
+                        this.leftAlertRail.style.display = (compact || this.leftPanelCollapsed) ? "none" : "flex";
+                    }
+                    if (this.rightPanel) {
+                        this.rightPanel.style.display = (compact || this.rightPanelCollapsed) ? "none" : "flex";
+                    }
+                    if (this.appRoot) {
+                        this.appRoot.classList.toggle("left-collapsed", !compact && this.leftPanelCollapsed);
+                        this.appRoot.classList.toggle("right-collapsed", !compact && this.rightPanelCollapsed);
+                    }
+
+                    var h = this.topbar ? this.topbar.offsetHeight : 54;
+                    document.documentElement.style.setProperty("--topbar-h", (h || 54) + "px");
+                    if (this.world3d) this.world3d.invalidate();
+                    if (this.detail3d) this.detail3d.invalidate();
                 },
 
                 openPanelTab: function (tab) {
@@ -915,7 +1402,16 @@
                     this.roleCaption.textContent = "Role: " + role;
                     this.renderPermissions(perms);
                     this.btnStyle.disabled = !perms.styleSwitch;
-                    this.btnEnter.disabled = !this.selectedId || !perms.enterBuilding;
+                    this.btnImport.disabled = !perms.editLayout;
+                    this.btnRoadDraw.disabled = !perms.editLayout;
+                    this.btnEdit.disabled = !perms.editLayout;
+                    this.btnEnter.disabled = this.editMode || this.roadDrawMode || !this.selectedId || !perms.enterBuilding;
+                    if (!perms.editLayout && this.editMode) {
+                        this.setEditMode(false);
+                    }
+                    if (!perms.editLayout && this.roadDrawMode) {
+                        this.setRoadDrawMode(false, true);
+                    }
                     if (!perms.enterBuilding && this.detailOpen) {
                         this.closeDetailView();
                     }
@@ -933,6 +1429,7 @@
                     var labels = [
                         ["Enter Building", perms.enterBuilding],
                         ["Switch Map Style", perms.styleSwitch],
+                        ["Edit Layout", perms.editLayout],
                         ["Detail Popup", perms.detailPopup],
                         ["Alert Console", perms.alertConsole]
                     ];
@@ -948,6 +1445,7 @@
                 bindResize: function () {
                     var self = this;
                     window.addEventListener("resize", function () {
+                        self.applyLayout();
                         self.world3d.invalidate();
                         self.detail3d.invalidate();
                     }, false);
@@ -975,8 +1473,11 @@
                     this.world3d.setEye([0, 1650, 1800]);
                     this.world3d.setCenter([0, 120, 0]);
                     this.world3d.setEditable(false);
-                    this.world3d.setMovableFunc(function () {
-                        return false;
+                    var self = this;
+                    this.world3d.setMovableFunc(function (data) {
+                        if (!(self.editMode && data && data.a)) return false;
+                        var kind = data.a("kind");
+                        return kind === "building" || kind === "junction" || kind === "importedAsset";
                     });
 
                     var host = document.getElementById("world-host");
@@ -1369,6 +1870,156 @@
                     this.reloadMapForZoom(this.activeZoom || this.zoom, true);
                 },
 
+                updateCenterChip: function () {
+                    if (!this.centerChip) return;
+                    this.centerChip.textContent = "Center: " + this.center.lat.toFixed(4) + ", " + this.center.lng.toFixed(4);
+                },
+
+                promptMapCenter: function () {
+                    if (this.detailOpen) {
+                        this.closeDetailView();
+                    }
+                    this.openCenterModal();
+                },
+
+                parseLatLngInput: function (text) {
+                    if (!text) return null;
+                    var normalized = String(text).trim().replace(/[，]/g, ",");
+                    var parts = normalized.indexOf(",") >= 0 ? normalized.split(",") : normalized.split(/\s+/);
+                    if (parts.length < 2) {
+                        var nums = normalized.match(/[-+]?\d+(?:\.\d+)?/g);
+                        if (!nums || nums.length < 2) return null;
+                        parts = nums;
+                    }
+                    var lat = parseFloat(String(parts[0]).trim());
+                    var lng = parseFloat(String(parts[1]).trim());
+                    if (!isFinite(lat) || !isFinite(lng)) return null;
+                    if (lat < -85 || lat > 85 || lng < -180 || lng > 180) return null;
+                    return { lat: lat, lng: lng };
+                },
+
+                openCenterModal: function () {
+                    if (!this.centerModal || !this.centerInput) return;
+                    this.centerInput.value = this.center.lat.toFixed(6) + ", " + this.center.lng.toFixed(6);
+                    this.centerModal.classList.add("visible");
+                    var self = this;
+                    setTimeout(function () {
+                        self.centerInput.focus();
+                        self.centerInput.select();
+                    }, 20);
+                },
+
+                closeCenterModal: function () {
+                    if (!this.centerModal) return;
+                    this.centerModal.classList.remove("visible");
+                },
+
+                applyCenterFromInput: function () {
+                    if (!this.centerInput) return;
+                    var parsed = this.parseLatLngInput(this.centerInput.value);
+                    if (!parsed) {
+                        this.status.textContent = "Invalid center. Use latitude,longitude";
+                        return;
+                    }
+                    this.closeCenterModal();
+                    this.setMapCenter(parsed.lat, parsed.lng);
+                },
+
+                setMapCenter: function (lat, lng) {
+                    if (this.editMode) {
+                        this.syncMovedBuildings(true);
+                        this.syncMovedJunctions(true);
+                        this.syncMovedImportedAssets();
+                    }
+                    var fromCenter = { lat: this.center.lat, lng: this.center.lng };
+                    var toCenter = { lat: lat, lng: lng };
+                    var anchorZoom = this.activeZoom || this.zoom || this.baseZoom;
+                    if (this.buildings.length) {
+                        this.reanchorBuildingsForNewCenter(fromCenter, toCenter, anchorZoom);
+                    }
+                    if (this.junctions.length) {
+                        this.reanchorJunctionsForNewCenter(fromCenter, toCenter, anchorZoom);
+                    }
+                    if (this.importedAssets.length) {
+                        this.reanchorImportedAssetsForNewCenter(fromCenter, toCenter, anchorZoom);
+                    }
+                    if (this.customRoadPaths.length) {
+                        this.reanchorCustomRoadPathsForNewCenter(fromCenter, toCenter, anchorZoom);
+                    }
+                    this.center = toCenter;
+                    this.updateCenterChip();
+                    this.status.textContent = "Center moved to " + lat.toFixed(4) + ", " + lng.toFixed(4);
+                    this.reloadMapForZoom(anchorZoom, true);
+                },
+
+                reanchorBuildingsForNewCenter: function (fromCenter, toCenter, zoom) {
+                    var fromTile = this.latLngToTile(fromCenter.lat, fromCenter.lng, zoom);
+                    var toTile = this.latLngToTile(toCenter.lat, toCenter.lng, zoom);
+                    for (var i = 0; i < this.buildings.length; i++) {
+                        var b = this.buildings[i];
+                        var tile = this.latLngToTile(b.lat, b.lng, zoom);
+                        var nx = toTile.x + (tile.x - fromTile.x);
+                        var ny = toTile.y + (tile.y - fromTile.y);
+                        var ll = this.tileToLatLng(nx, ny, zoom);
+                        b.lat = ll.lat;
+                        b.lng = ll.lng;
+                    }
+                },
+
+                reanchorJunctionsForNewCenter: function (fromCenter, toCenter, zoom) {
+                    var fromTile = this.latLngToTile(fromCenter.lat, fromCenter.lng, zoom);
+                    var toTile = this.latLngToTile(toCenter.lat, toCenter.lng, zoom);
+                    for (var i = 0; i < this.junctions.length; i++) {
+                        var j = this.junctions[i];
+                        var tile = this.latLngToTile(j.lat, j.lng, zoom);
+                        var nx = toTile.x + (tile.x - fromTile.x);
+                        var ny = toTile.y + (tile.y - fromTile.y);
+                        var ll = this.tileToLatLng(nx, ny, zoom);
+                        j.lat = ll.lat;
+                        j.lng = ll.lng;
+                    }
+                },
+
+                reanchorImportedAssetsForNewCenter: function (fromCenter, toCenter, zoom) {
+                    var fromTile = this.latLngToTile(fromCenter.lat, fromCenter.lng, zoom);
+                    var toTile = this.latLngToTile(toCenter.lat, toCenter.lng, zoom);
+                    for (var i = 0; i < this.importedAssets.length; i++) {
+                        var a = this.importedAssets[i];
+                        var tile = this.latLngToTile(a.lat, a.lng, zoom);
+                        var nx = toTile.x + (tile.x - fromTile.x);
+                        var ny = toTile.y + (tile.y - fromTile.y);
+                        var ll = this.tileToLatLng(nx, ny, zoom);
+                        a.lat = ll.lat;
+                        a.lng = ll.lng;
+                    }
+                },
+
+                reanchorCustomRoadPathsForNewCenter: function (fromCenter, toCenter, zoom) {
+                    var fromTile = this.latLngToTile(fromCenter.lat, fromCenter.lng, zoom);
+                    var toTile = this.latLngToTile(toCenter.lat, toCenter.lng, zoom);
+                    for (var i = 0; i < this.customRoadPaths.length; i++) {
+                        var path = this.customRoadPaths[i];
+                        for (var j = 0; j < path.points.length; j++) {
+                            var p = path.points[j];
+                            var tile = this.latLngToTile(p.lat, p.lng, zoom);
+                            var nx = toTile.x + (tile.x - fromTile.x);
+                            var ny = toTile.y + (tile.y - fromTile.y);
+                            var ll = this.tileToLatLng(nx, ny, zoom);
+                            p.lat = ll.lat;
+                            p.lng = ll.lng;
+                        }
+                    }
+                    for (var k = 0; k < this.drawingRoadPoints.length; k++) {
+                        var d = this.drawingRoadPoints[k];
+                        var tile2 = this.latLngToTile(d.lat, d.lng, zoom);
+                        var nx2 = toTile.x + (tile2.x - fromTile.x);
+                        var ny2 = toTile.y + (tile2.y - fromTile.y);
+                        var ll2 = this.tileToLatLng(nx2, ny2, zoom);
+                        d.lat = ll2.lat;
+                        d.lng = ll2.lng;
+                    }
+                },
+
                 getFallbackStyleKey: function () {
                     if (this.currentMapStyle !== "osm" && this.mapStyles.osm) return "osm";
                     return null;
@@ -1401,8 +2052,24 @@
 
                 bindWorldInteraction: function () {
                     var self = this;
+                    this.world3d.getView().addEventListener("click", function (e) {
+                        if (!self.roadDrawMode || self.detailOpen) return;
+                        var point = self.captureRoadPointFromEvent(e);
+                        if (!point) {
+                            self.status.textContent = "Road draw: click a building, junction, imported asset, or map surface.";
+                            return;
+                        }
+                        self.addRoadWaypoint(point);
+                        self.status.textContent = "Road draw waypoint added (" + self.drawingRoadPoints.length + ")";
+                        e.preventDefault();
+                    });
                     var listener = function (e) {
                         if (!e || !e.kind) return;
+                        if (self.editMode && (e.kind === "betweenMove" || e.kind === "endMove" || e.kind === "betweenTranslate" || e.kind === "endTranslate")) {
+                            self.syncMovedBuildings(false);
+                            self.syncMovedJunctions(false);
+                            self.syncMovedImportedAssets();
+                        }
                         if (e.kind === "endZoom" || e.kind === "endPinch" || e.kind === "endWalk" || e.kind === "endPan") {
                             self.syncMapZoomWithCamera(false);
                         }
@@ -1413,6 +2080,539 @@
                     else if (this.world3d.addInteractorListener) {
                         this.world3d.addInteractorListener(listener);
                     }
+                },
+
+                setEditMode: function (enabled) {
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    if (enabled && !perms.editLayout) {
+                        this.status.textContent = "RBAC: current role cannot edit building layout";
+                        return;
+                    }
+                    if (!!enabled === !!this.editMode) return;
+                    if (enabled && this.detailOpen) {
+                        this.closeDetailView();
+                    }
+
+                    this.editMode = !!enabled;
+                    this.world3d.setEditable(this.editMode);
+                    if (this.btnEdit) {
+                        this.btnEdit.textContent = "Edit Layout: " + (this.editMode ? "On" : "Off");
+                        this.btnEdit.classList.toggle("toggle-on", this.editMode);
+                    }
+                    if (this.btnEnter) {
+                        this.btnEnter.disabled = this.editMode || this.roadDrawMode || !this.selectedId || !perms.enterBuilding;
+                    }
+
+                    if (this.editMode) {
+                        this.startEditSync();
+                        this.status.textContent = "Edit mode ON: drag buildings, road junctions, and imported assets";
+                    }
+                    else {
+                        this.stopEditSync();
+                        this.syncMovedBuildings(true);
+                        this.syncMovedJunctions(true);
+                        this.syncMovedImportedAssets();
+                        this.status.textContent = "Edit mode OFF: layout fixed";
+                    }
+                },
+
+                startEditSync: function () {
+                    var self = this;
+                    if (this.editSyncTimer) clearInterval(this.editSyncTimer);
+                    this.editSyncTimer = setInterval(function () {
+                        self.syncMovedBuildings(false);
+                        self.syncMovedJunctions(false);
+                        self.syncMovedImportedAssets();
+                    }, 140);
+                },
+
+                stopEditSync: function () {
+                    if (this.editSyncTimer) {
+                        clearInterval(this.editSyncTimer);
+                        this.editSyncTimer = null;
+                    }
+                },
+
+                syncMovedBuildings: function (forceRouteRebuild) {
+                    if (!this.mapMeta || !this.buildings.length) return;
+                    var changed = false;
+                    for (var i = 0; i < this.buildings.length; i++) {
+                        var b = this.buildings[i];
+                        var p = b.node.p3();
+                        if (!p) continue;
+                        var nx = p[0];
+                        var nz = p[2];
+                        if (Math.abs(nx - b.x) < 0.5 && Math.abs(nz - b.z) < 0.5) continue;
+                        b.x = nx;
+                        b.z = nz;
+                        b.district = this.computeDistrict(b.x, b.z);
+                        this.syncBuildingLatLngFromWorld(b);
+                        this.updateBuildingGeometry(b);
+                        changed = true;
+                    }
+                    if (!changed) return;
+                    this.updateDashboard();
+                    if (forceRouteRebuild) this.rebuildNetworks();
+                    else this.scheduleRouteRebuild();
+                    if (this.selectedId && this.detailOpen && this.byId[this.selectedId]) {
+                        this.prepareDetailScene(this.byId[this.selectedId]);
+                    }
+                },
+
+                syncMovedJunctions: function (forceRouteRebuild) {
+                    if (!this.mapMeta || !this.junctions.length) return;
+                    var changed = false;
+                    for (var i = 0; i < this.junctions.length; i++) {
+                        var j = this.junctions[i];
+                        var p = j.node && j.node.p3 ? j.node.p3() : null;
+                        if (!p) continue;
+                        var nx = p[0];
+                        var nz = p[2];
+                        if (Math.abs(nx - j.x) < 0.5 && Math.abs(nz - j.z) < 0.5) continue;
+                        j.x = nx;
+                        j.z = nz;
+                        this.syncJunctionLatLngFromWorld(j);
+                        changed = true;
+                    }
+                    if (!changed) return;
+                    if (forceRouteRebuild) this.rebuildNetworks();
+                    else this.scheduleRouteRebuild();
+                },
+
+                syncMovedImportedAssets: function () {
+                    if (!this.mapMeta || !this.importedAssets.length) return;
+                    for (var i = 0; i < this.importedAssets.length; i++) {
+                        var a = this.importedAssets[i];
+                        var p = a.node && a.node.p3 ? a.node.p3() : null;
+                        if (!p) continue;
+                        var nx = p[0];
+                        var nz = p[2];
+                        if (Math.abs(nx - a.x) < 0.5 && Math.abs(nz - a.z) < 0.5) continue;
+                        a.x = nx;
+                        a.z = nz;
+                        this.syncImportedAssetLatLngFromWorld(a);
+                    }
+                },
+
+                scheduleRouteRebuild: function () {
+                    var self = this;
+                    if (this.routeRebuildTimer) {
+                        clearTimeout(this.routeRebuildTimer);
+                    }
+                    this.routeRebuildTimer = setTimeout(function () {
+                        self.routeRebuildTimer = null;
+                        self.rebuildNetworks();
+                    }, 120);
+                },
+
+                toggleRoutes: function () {
+                    this.routesVisible = !this.routesVisible;
+                    this.updateRouteVisibility();
+                    if (this.btnRoutes) {
+                        this.btnRoutes.textContent = "Routes: " + (this.routesVisible ? "On" : "Off");
+                        this.btnRoutes.classList.toggle("toggle-on", this.routesVisible);
+                    }
+                },
+
+                clearRouteNetwork: function () {
+                    for (var i = 0; i < this.routeNodes.length; i++) {
+                        this.worldDM.remove(this.routeNodes[i]);
+                    }
+                    this.routeNodes = [];
+                },
+
+                clearJunctionRoadNetwork: function () {
+                    for (var i = 0; i < this.junctionRoadNodes.length; i++) {
+                        this.worldDM.remove(this.junctionRoadNodes[i]);
+                    }
+                    this.junctionRoadNodes = [];
+                },
+
+                rebuildNetworks: function () {
+                    this.createRouteNetwork();
+                    this.createJunctionRoadNetwork();
+                },
+
+                createRouteNetwork: function () {
+                    if (!this.worldDM || !this.buildings.length) return;
+                    this.clearRouteNetwork();
+                    var pairs = this.collectRoutePairs(2, 980);
+                    for (var i = 0; i < pairs.length; i++) {
+                        var a = this.buildings[pairs[i].a];
+                        var b = this.buildings[pairs[i].b];
+                        var dx = b.x - a.x;
+                        var dz = b.z - a.z;
+                        var len = Math.sqrt(dx * dx + dz * dz);
+                        if (len < 6) continue;
+                        var segment = new ht.Node();
+                        segment.p3([(a.x + b.x) / 2, 8, (a.z + b.z) / 2]);
+                        segment.s3([7, 2.8, len]);
+                        segment.r3([0, Math.atan2(dx, dz), 0]);
+                        segment.s({
+                            "shape3d": "box",
+                            "shape3d.color": "rgba(70, 201, 255, 0.62)",
+                            "shape3d.top.color": "rgba(183, 238, 255, 0.86)",
+                            "shape3d.transparent": true,
+                            "shape3d.light": true
+                        });
+                        segment.a("kind", "route");
+                        if (segment.setVisible) segment.setVisible(this.routesVisible);
+                        this.worldDM.add(segment);
+                        this.routeNodes.push(segment);
+                    }
+                    this.world3d.invalidate();
+                },
+
+                collectRoutePairs: function (neighborsPerBuilding, maxDistance) {
+                    var pairMap = {};
+                    for (var i = 0; i < this.buildings.length; i++) {
+                        var candidates = [];
+                        var a = this.buildings[i];
+                        for (var j = 0; j < this.buildings.length; j++) {
+                            if (i === j) continue;
+                            var b = this.buildings[j];
+                            var dx = b.x - a.x;
+                            var dz = b.z - a.z;
+                            var d = Math.sqrt(dx * dx + dz * dz);
+                            if (d > maxDistance) continue;
+                            candidates.push({ j: j, d: d });
+                        }
+                        candidates.sort(function (m, n) { return m.d - n.d; });
+                        for (var k = 0; k < candidates.length && k < neighborsPerBuilding; k++) {
+                            var idx = candidates[k].j;
+                            var min = i < idx ? i : idx;
+                            var max = i < idx ? idx : i;
+                            pairMap[min + ":" + max] = { a: min, b: max };
+                        }
+                    }
+                    var out = [];
+                    for (var key in pairMap) {
+                        if (Object.prototype.hasOwnProperty.call(pairMap, key)) {
+                            out.push(pairMap[key]);
+                        }
+                    }
+                    return out;
+                },
+
+                collectJunctionPairs: function (neighborsPerJunction, maxDistance) {
+                    var pairMap = {};
+                    for (var i = 0; i < this.junctions.length; i++) {
+                        var candidates = [];
+                        var a = this.junctions[i];
+                        for (var j = 0; j < this.junctions.length; j++) {
+                            if (i === j) continue;
+                            var b = this.junctions[j];
+                            var dx = b.x - a.x;
+                            var dz = b.z - a.z;
+                            var d = Math.sqrt(dx * dx + dz * dz);
+                            if (d > maxDistance) continue;
+                            candidates.push({ j: j, d: d });
+                        }
+                        candidates.sort(function (m, n) { return m.d - n.d; });
+                        for (var k = 0; k < candidates.length && k < neighborsPerJunction; k++) {
+                            var idx = candidates[k].j;
+                            var min = i < idx ? i : idx;
+                            var max = i < idx ? idx : i;
+                            pairMap[min + ":" + max] = { a: min, b: max };
+                        }
+                    }
+                    var out = [];
+                    for (var key in pairMap) {
+                        if (Object.prototype.hasOwnProperty.call(pairMap, key)) {
+                            out.push(pairMap[key]);
+                        }
+                    }
+                    return out;
+                },
+
+                createJunctionRoadNetwork: function () {
+                    if (!this.worldDM || !this.junctions.length) return;
+                    this.clearJunctionRoadNetwork();
+                    var pairs = this.collectJunctionPairs(2, 980);
+                    for (var i = 0; i < pairs.length; i++) {
+                        var a = this.junctions[pairs[i].a];
+                        var b = this.junctions[pairs[i].b];
+                        this.createRoadSegmentNode(a.x, a.z, b.x, b.z, 5.5, "rgba(96, 175, 205, 0.55)", "junctionRoad");
+                    }
+
+                    for (var n = 0; n < this.buildings.length; n++) {
+                        var building = this.buildings[n];
+                        var nearest = this.findNearestJunction(building.x, building.z, 820);
+                        if (!nearest) continue;
+                        this.createRoadSegmentNode(building.x, building.z, nearest.x, nearest.z, 4.2, "rgba(117, 196, 226, 0.42)", "buildingRoad");
+                    }
+                    this.world3d.invalidate();
+                },
+
+                findNearestJunction: function (x, z, maxDistance) {
+                    var best = null;
+                    var bestD = Infinity;
+                    for (var i = 0; i < this.junctions.length; i++) {
+                        var j = this.junctions[i];
+                        var dx = j.x - x;
+                        var dz = j.z - z;
+                        var d = Math.sqrt(dx * dx + dz * dz);
+                        if (d < bestD && d <= maxDistance) {
+                            bestD = d;
+                            best = j;
+                        }
+                    }
+                    return best;
+                },
+
+                createRoadSegmentNode: function (x1, z1, x2, z2, width, color, kind, targetNodes) {
+                    var dx = x2 - x1;
+                    var dz = z2 - z1;
+                    var len = Math.sqrt(dx * dx + dz * dz);
+                    if (len < 5) return;
+                    var segment = new ht.Node();
+                    segment.p3([(x1 + x2) / 2, 6, (z1 + z2) / 2]);
+                    segment.s3([width, 2.2, len]);
+                    segment.r3([0, Math.atan2(dx, dz), 0]);
+                    segment.s({
+                        "shape3d": "box",
+                        "shape3d.color": color,
+                        "shape3d.top.color": "rgba(188, 233, 255, 0.78)",
+                        "shape3d.transparent": true,
+                        "shape3d.light": true
+                    });
+                    segment.a("kind", kind || "junctionRoad");
+                    if (segment.setVisible) segment.setVisible(this.routesVisible);
+                    this.worldDM.add(segment);
+                    if (targetNodes && targetNodes.push) targetNodes.push(segment);
+                    else this.junctionRoadNodes.push(segment);
+                },
+
+                updateRouteVisibility: function () {
+                    for (var i = 0; i < this.routeNodes.length; i++) {
+                        if (this.routeNodes[i].setVisible) {
+                            this.routeNodes[i].setVisible(this.routesVisible);
+                        }
+                    }
+                    for (var j = 0; j < this.junctionRoadNodes.length; j++) {
+                        if (this.junctionRoadNodes[j].setVisible) {
+                            this.junctionRoadNodes[j].setVisible(this.routesVisible);
+                        }
+                    }
+                    for (var n = 0; n < this.customRoadNodes.length; n++) {
+                        if (this.customRoadNodes[n].setVisible) {
+                            this.customRoadNodes[n].setVisible(this.routesVisible);
+                        }
+                    }
+                    for (var d = 0; d < this.draftRoadNodes.length; d++) {
+                        if (this.draftRoadNodes[d].setVisible) {
+                            this.draftRoadNodes[d].setVisible(this.routesVisible);
+                        }
+                    }
+                    this.world3d.invalidate();
+                },
+
+                updateRoadDrawUi: function () {
+                    if (this.btnRoadDraw) {
+                        this.btnRoadDraw.textContent = this.roadDrawMode ? "Save Road Path" : "Road Path: Off";
+                        this.btnRoadDraw.classList.toggle("toggle-on", this.roadDrawMode);
+                    }
+                    if (this.roadChip) {
+                        this.roadChip.textContent = this.roadDrawMode ?
+                            ("Road Draw: " + this.drawingRoadPoints.length + " waypoint(s)") :
+                            ("Road Draw: Off");
+                    }
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    if (this.btnEnter) {
+                        this.btnEnter.disabled = this.editMode || this.roadDrawMode || !this.selectedId || !perms.enterBuilding;
+                    }
+                },
+
+                toggleRoadDrawMode: function () {
+                    if (this.roadDrawMode && this.drawingRoadPoints.length >= 2) {
+                        this.commitRoadDrawPath();
+                        return;
+                    }
+                    this.setRoadDrawMode(!this.roadDrawMode);
+                },
+
+                setRoadDrawMode: function (enabled, discardOnly) {
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    if (enabled && !perms.editLayout) {
+                        this.status.textContent = "RBAC: current role cannot draw road paths";
+                        return;
+                    }
+                    this.roadDrawMode = !!enabled;
+                    if (!this.roadDrawMode || discardOnly) {
+                        this.drawingRoadPoints = [];
+                        this.clearDraftRoadPath();
+                    }
+                    if (this.roadDrawMode && this.detailOpen) {
+                        this.closeDetailView();
+                    }
+                    this.updateRoadDrawUi();
+                    if (this.roadDrawMode) {
+                        this.status.textContent = "Road draw ON: click buildings, junctions, or map surface to add waypoints. Click button again to save.";
+                    }
+                    else if (!discardOnly) {
+                        this.status.textContent = "Road draw OFF";
+                    }
+                },
+
+                captureRoadPointFromEvent: function (e) {
+                    if (!this.world3d || !this.mapMeta) return null;
+                    var data = this.world3d.getDataAt(e);
+                    var p = null;
+                    if (data && data.p3) {
+                        var kind = data.a ? data.a("kind") : null;
+                        if (kind === "buildingPart") {
+                            var id = data.a("buildingId");
+                            if (id && this.byId[id] && this.byId[id].node) {
+                                p = this.byId[id].node.p3();
+                            }
+                        }
+                        else if (kind === "building" || kind === "junction" || kind === "importedAsset") {
+                            p = data.p3();
+                        }
+                    }
+                    if (!p && this.world3d.getDataInfoAt) {
+                        var info = this.world3d.getDataInfoAt(e);
+                        p = this.extract3dPointFromInfo(info);
+                    }
+                    if (!p) return null;
+                    var clamped = this.clampWorldPointToMap(p[0], p[2], 12);
+                    var latLng = this.worldToLatLng(clamped.x, clamped.z);
+                    return {
+                        x: clamped.x,
+                        z: clamped.z,
+                        lat: latLng.lat,
+                        lng: latLng.lng
+                    };
+                },
+
+                extract3dPointFromInfo: function (info) {
+                    if (!info) return null;
+                    var keys = ["point3d", "intersectPoint", "worldPoint", "point", "position3d", "position", "p3"];
+                    for (var i = 0; i < keys.length; i++) {
+                        var p = this.normalize3dPoint(info[keys[i]]);
+                        if (p) return p;
+                    }
+                    if (info.data && info.data.p3) {
+                        return this.normalize3dPoint(info.data.p3());
+                    }
+                    return null;
+                },
+
+                normalize3dPoint: function (value) {
+                    if (!value) return null;
+                    if (Object.prototype.toString.call(value) === "[object Array]" && value.length >= 3) {
+                        return [Number(value[0]) || 0, Number(value[1]) || 0, Number(value[2]) || 0];
+                    }
+                    if (typeof value === "object" && value.x != null && value.y != null && value.z != null) {
+                        return [Number(value.x) || 0, Number(value.y) || 0, Number(value.z) || 0];
+                    }
+                    return null;
+                },
+
+                addRoadWaypoint: function (point) {
+                    this.drawingRoadPoints.push({
+                        x: point.x,
+                        z: point.z,
+                        lat: point.lat,
+                        lng: point.lng
+                    });
+                    this.renderDraftRoadPath();
+                    this.updateRoadDrawUi();
+                },
+
+                clearDraftRoadPath: function () {
+                    for (var i = 0; i < this.draftRoadNodes.length; i++) {
+                        this.worldDM.remove(this.draftRoadNodes[i]);
+                    }
+                    this.draftRoadNodes = [];
+                    this.world3d.invalidate();
+                },
+
+                renderDraftRoadPath: function () {
+                    this.clearDraftRoadPath();
+                    if (!this.drawingRoadPoints.length) return;
+                    var i;
+                    for (i = 0; i < this.drawingRoadPoints.length; i++) {
+                        var p = this.drawingRoadPoints[i];
+                        var marker = new ht.Node();
+                        marker.p3([p.x, 10, p.z]);
+                        marker.s3([9, 9, 9]);
+                        marker.s({
+                            "shape3d": "sphere",
+                            "shape3d.color": "rgba(255, 225, 153, 0.92)",
+                            "shape3d.light": true
+                        });
+                        marker.a("kind", "roadDraft");
+                        if (marker.setVisible) marker.setVisible(this.routesVisible);
+                        this.worldDM.add(marker);
+                        this.draftRoadNodes.push(marker);
+                    }
+                    var poly = this.buildRoadPolyline(this.drawingRoadPoints);
+                    for (i = 0; i < poly.length - 1; i++) {
+                        this.createRoadSegmentNode(poly[i].x, poly[i].z, poly[i + 1].x, poly[i + 1].z, 5.6, "rgba(255, 223, 158, 0.66)", "roadDraft", this.draftRoadNodes);
+                    }
+                    this.world3d.invalidate();
+                },
+
+                commitRoadDrawPath: function () {
+                    if (this.drawingRoadPoints.length < 2) {
+                        this.setRoadDrawMode(false, true);
+                        this.status.textContent = "Road draw canceled (need at least 2 waypoints)";
+                        return;
+                    }
+                    this.customRoadCounter += 1;
+                    this.customRoadPaths.push({
+                        id: "RPATH-" + this.pad(this.customRoadCounter, 3),
+                        points: this.drawingRoadPoints.map(function (p) {
+                            return { x: p.x, z: p.z, lat: p.lat, lng: p.lng };
+                        })
+                    });
+                    this.drawingRoadPoints = [];
+                    this.clearDraftRoadPath();
+                    this.setRoadDrawMode(false);
+                    this.renderCustomRoadPaths();
+                    this.status.textContent = "Custom road path saved";
+                },
+
+                buildRoadPolyline: function (points) {
+                    if (!points || points.length < 2) return points ? points.slice() : [];
+                    var out = [{ x: points[0].x, z: points[0].z }];
+                    for (var i = 1; i < points.length; i++) {
+                        var a = points[i - 1];
+                        var b = points[i];
+                        var dx = b.x - a.x;
+                        var dz = b.z - a.z;
+                        var needBend = Math.abs(dx) > 12 && Math.abs(dz) > 12;
+                        if (needBend) {
+                            var via = Math.abs(dx) > Math.abs(dz) ? { x: b.x, z: a.z } : { x: a.x, z: b.z };
+                            out.push(via);
+                        }
+                        out.push({ x: b.x, z: b.z });
+                    }
+                    return out;
+                },
+
+                renderCustomRoadPaths: function () {
+                    for (var i = 0; i < this.customRoadNodes.length; i++) {
+                        this.worldDM.remove(this.customRoadNodes[i]);
+                    }
+                    this.customRoadNodes = [];
+                    for (var p = 0; p < this.customRoadPaths.length; p++) {
+                        var path = this.customRoadPaths[p];
+                        var poly = this.buildRoadPolyline(path.points);
+                        for (var i2 = 0; i2 < poly.length - 1; i2++) {
+                            this.createRoadSegmentNode(poly[i2].x, poly[i2].z, poly[i2 + 1].x, poly[i2 + 1].z, 6.8, "rgba(239, 246, 255, 0.56)", "customRoad", this.customRoadNodes);
+                        }
+                    }
+                    this.updateRouteVisibility();
+                },
+
+                worldToLatLng: function (x, z) {
+                    if (!this.mapMeta) return { lat: this.center.lat, lng: this.center.lng };
+                    var worldPx = this.worldXZToWorldPx(x, z);
+                    var tileX = worldPx.x / this.tileSize;
+                    var tileY = worldPx.y / this.tileSize;
+                    return this.tileToLatLng(tileX, tileY, this.mapMeta.zoom);
                 },
 
                 startZoomMonitor: function () {
@@ -1456,6 +2656,11 @@
 
                 reloadMapForZoom: function (targetZoom, force) {
                     var self = this;
+                    if (this.editMode) {
+                        this.syncMovedBuildings(true);
+                        this.syncMovedJunctions(true);
+                        this.syncMovedImportedAssets();
+                    }
                     targetZoom = this.clamp(targetZoom, this.minZoom, this.maxZoom);
                     if (!force && this.mapMeta && this.activeZoom === targetZoom) {
                         return Promise.resolve();
@@ -1508,6 +2713,12 @@
                             self.reprojectBuildingsToCurrentMap();
                             self.updateDashboard();
                         }
+                        else {
+                            if (self.junctions.length) self.reprojectJunctionsToCurrentMap();
+                            if (self.importedAssets.length) self.reprojectImportedAssetsToCurrentMap();
+                            self.reprojectCustomRoadPathsToCurrentMap();
+                            self.rebuildNetworks();
+                        }
                         self.world3d.invalidate();
                     }).catch(function (err) {
                         self.showBootError(err && err.message ? err.message : String(err));
@@ -1526,9 +2737,68 @@
                         b.district = this.computeDistrict(b.x, b.z);
                         this.updateBuildingGeometry(b);
                     }
+                    this.reprojectJunctionsToCurrentMap();
+                    this.reprojectImportedAssetsToCurrentMap();
+                    this.reprojectCustomRoadPathsToCurrentMap();
+                    this.rebuildNetworks();
                     if (this.selectedId && this.detailOpen) {
                         this.prepareDetailScene(this.byId[this.selectedId]);
                     }
+                },
+
+                reprojectJunctionsToCurrentMap: function () {
+                    if (!this.mapMeta || !this.junctions.length) return;
+                    for (var i = 0; i < this.junctions.length; i++) {
+                        var j = this.junctions[i];
+                        var tile = this.latLngToTile(j.lat, j.lng, this.mapMeta.zoom);
+                        var world = this.worldPxToWorldXZ(tile.x * this.tileSize, tile.y * this.tileSize);
+                        j.x = world.x;
+                        j.z = world.z;
+                        if (j.node) {
+                            var p = j.node.p3();
+                            j.node.p3([j.x, (p ? p[1] : 9), j.z]);
+                        }
+                    }
+                },
+
+                reprojectImportedAssetsToCurrentMap: function () {
+                    if (!this.mapMeta || !this.importedAssets.length) return;
+                    for (var i = 0; i < this.importedAssets.length; i++) {
+                        var a = this.importedAssets[i];
+                        var tile = this.latLngToTile(a.lat, a.lng, this.mapMeta.zoom);
+                        var world = this.worldPxToWorldXZ(tile.x * this.tileSize, tile.y * this.tileSize);
+                        a.x = world.x;
+                        a.z = world.z;
+                        if (a.node) {
+                            var p = a.node.p3();
+                            a.node.p3([a.x, (p ? p[1] : 46), a.z]);
+                        }
+                    }
+                },
+
+                reprojectCustomRoadPathsToCurrentMap: function () {
+                    if (!this.mapMeta) return;
+                    var i;
+                    var j;
+                    for (i = 0; i < this.customRoadPaths.length; i++) {
+                        var path = this.customRoadPaths[i];
+                        for (j = 0; j < path.points.length; j++) {
+                            var p = path.points[j];
+                            var tile = this.latLngToTile(p.lat, p.lng, this.mapMeta.zoom);
+                            var world = this.worldPxToWorldXZ(tile.x * this.tileSize, tile.y * this.tileSize);
+                            p.x = world.x;
+                            p.z = world.z;
+                        }
+                    }
+                    for (i = 0; i < this.drawingRoadPoints.length; i++) {
+                        var draftP = this.drawingRoadPoints[i];
+                        var tile2 = this.latLngToTile(draftP.lat, draftP.lng, this.mapMeta.zoom);
+                        var world2 = this.worldPxToWorldXZ(tile2.x * this.tileSize, tile2.y * this.tileSize);
+                        draftP.x = world2.x;
+                        draftP.z = world2.z;
+                    }
+                    this.renderCustomRoadPaths();
+                    this.renderDraftRoadPath();
                 },
 
                 worldPxToWorldXZ: function (pxX, pxY) {
@@ -1538,6 +2808,43 @@
                         x: dxPx * this.unitsPerPixel,
                         z: dyPx * this.unitsPerPixel
                     };
+                },
+
+                worldXZToWorldPx: function (x, z) {
+                    return {
+                        x: this.mapMeta.centerWorldPxX + x / this.unitsPerPixel,
+                        y: this.mapMeta.centerWorldPxY + z / this.unitsPerPixel
+                    };
+                },
+
+                syncBuildingLatLngFromWorld: function (b) {
+                    if (!this.mapMeta) return;
+                    var worldPx = this.worldXZToWorldPx(b.x, b.z);
+                    var tileX = worldPx.x / this.tileSize;
+                    var tileY = worldPx.y / this.tileSize;
+                    var ll = this.tileToLatLng(tileX, tileY, this.mapMeta.zoom);
+                    b.lat = ll.lat;
+                    b.lng = ll.lng;
+                },
+
+                syncJunctionLatLngFromWorld: function (j) {
+                    if (!this.mapMeta) return;
+                    var worldPx = this.worldXZToWorldPx(j.x, j.z);
+                    var tileX = worldPx.x / this.tileSize;
+                    var tileY = worldPx.y / this.tileSize;
+                    var ll = this.tileToLatLng(tileX, tileY, this.mapMeta.zoom);
+                    j.lat = ll.lat;
+                    j.lng = ll.lng;
+                },
+
+                syncImportedAssetLatLngFromWorld: function (a) {
+                    if (!this.mapMeta) return;
+                    var worldPx = this.worldXZToWorldPx(a.x, a.z);
+                    var tileX = worldPx.x / this.tileSize;
+                    var tileY = worldPx.y / this.tileSize;
+                    var ll = this.tileToLatLng(tileX, tileY, this.mapMeta.zoom);
+                    a.lat = ll.lat;
+                    a.lng = ll.lng;
                 },
 
                 updateBuildingGeometry: function (b) {
@@ -1677,20 +2984,279 @@
                     }
                 },
 
+                createRoadJunctions: function (count) {
+                    this.clearRoadJunctions();
+                    if (!this.worldDM || !this.mapMeta) return;
+                    count = Math.max(4, count || 16);
+                    var i;
+                    for (i = 0; i < count; i++) {
+                        var source = this.buildings.length ? this.buildings[i % this.buildings.length] : null;
+                        var x;
+                        var z;
+                        if (source) {
+                            x = source.x + this.rand(-240, 240);
+                            z = source.z + this.rand(-240, 240);
+                        }
+                        else {
+                            var px = this.rand(80, this.mapMeta.width - 80);
+                            var py = this.rand(80, this.mapMeta.height - 80);
+                            var worldPxX = this.mapMeta.worldPxLeft + px;
+                            var worldPxY = this.mapMeta.worldPxTop + py;
+                            var world = this.worldPxToWorldXZ(worldPxX, worldPxY);
+                            x = world.x;
+                            z = world.z;
+                        }
+                        var clamped = this.clampWorldPointToMap(x, z, 22);
+                        x = clamped.x;
+                        z = clamped.z;
+
+                        var id = "JNC-" + this.pad(i + 1, 3);
+                        var node = new ht.Node();
+                        node.setName(id);
+                        node.p3([x, 8, z]);
+                        node.s3([16, 8, 16]);
+                        node.s({
+                            "shape3d": "sphere",
+                            "shape3d.color": "#9bd9ff",
+                            "shape3d.top.color": "#d4efff",
+                            "shape3d.light": true,
+                            "wf.visible": true,
+                            "wf.color": "rgba(15, 68, 98, 0.85)"
+                        });
+                        node.a("kind", "junction");
+                        node.a("junctionId", id);
+                        this.worldDM.add(node);
+
+                        var j = {
+                            id: id,
+                            x: x,
+                            z: z,
+                            lat: this.center.lat,
+                            lng: this.center.lng,
+                            node: node
+                        };
+                        this.syncJunctionLatLngFromWorld(j);
+                        this.junctions.push(j);
+                        this.junctionById[id] = j;
+                    }
+                },
+
+                clearRoadJunctions: function () {
+                    for (var i = 0; i < this.junctions.length; i++) {
+                        if (this.junctions[i].node) this.worldDM.remove(this.junctions[i].node);
+                    }
+                    this.junctions = [];
+                    this.junctionById = {};
+                    this.clearJunctionRoadNetwork();
+                },
+
+                clampWorldPointToMap: function (x, z, margin) {
+                    if (!this.mapMeta) return { x: x, z: z };
+                    margin = margin || 0;
+                    var halfW = (this.mapMeta.width * this.unitsPerPixel) / 2 - margin;
+                    var halfH = (this.mapMeta.height * this.unitsPerPixel) / 2 - margin;
+                    return {
+                        x: this.clamp(x, -halfW, halfW),
+                        z: this.clamp(z, -halfH, halfH)
+                    };
+                },
+
+                promptImportAsset: function () {
+                    var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
+                    if (!perms.editLayout) {
+                        this.status.textContent = "RBAC: current role cannot import assets";
+                        return;
+                    }
+                    if (this.detailOpen) this.closeDetailView();
+                    var formatRaw = window.prompt("3D import format? Type: obj or fbx", "obj");
+                    if (formatRaw == null) return;
+                    var format = String(formatRaw).trim().toLowerCase();
+                    if (format !== "obj" && format !== "fbx") {
+                        this.status.textContent = "Unsupported format. Use obj or fbx.";
+                        return;
+                    }
+
+                    var shapeNameSeed = "asset_model_" + (this.assetCounter + 1);
+                    var shapeName = window.prompt("Shape id used in scene (letters/numbers/_/-)", shapeNameSeed);
+                    if (shapeName == null) return;
+                    shapeName = shapeName.trim();
+                    if (!shapeName) {
+                        this.status.textContent = "Import canceled: shape id is required";
+                        return;
+                    }
+
+                    if (format === "obj") {
+                        var objUrl = window.prompt("OBJ file URL", "");
+                        if (!objUrl) return;
+                        var mtlUrl = window.prompt("MTL file URL (optional)", "") || "";
+                        this.importObjAsset(shapeName, objUrl.trim(), mtlUrl.trim());
+                        return;
+                    }
+
+                    var fbxUrl = window.prompt("FBX file URL", "");
+                    if (!fbxUrl) return;
+                    this.importFbxAsset(shapeName, fbxUrl.trim());
+                },
+
+                importObjAsset: function (shapeName, objUrl, mtlUrl) {
+                    var self = this;
+                    var asset = this.createImportedAssetNode(shapeName, "OBJ");
+                    this.status.textContent = "Loading OBJ asset: " + shapeName;
+                    try {
+                        ht.Default.loadObj(objUrl, mtlUrl || null, {
+                            shape3d: shapeName,
+                            center: true,
+                            cube: true,
+                            finishFunc: function (modelMap, array, rawS3) {
+                                self.completeImportedAsset(asset, shapeName, rawS3, "OBJ");
+                            }
+                        });
+                    }
+                    catch (err) {
+                        this.status.textContent = "OBJ import failed: " + (err && err.message ? err.message : String(err));
+                        return;
+                    }
+                    this.fallbackCompleteImportedAsset(asset, shapeName, "OBJ");
+                },
+
+                importFbxAsset: function (shapeName, fbxUrl) {
+                    var self = this;
+                    var asset = this.createImportedAssetNode(shapeName, "FBX");
+                    this.status.textContent = "Loading FBX asset: " + shapeName;
+                    try {
+                        ht.Default.loadFbx(fbxUrl, {
+                            shape3d: shapeName,
+                            center: true,
+                            cube: true,
+                            finishFunc: function (modelMap, array, rawS3) {
+                                self.completeImportedAsset(asset, shapeName, rawS3, "FBX");
+                            }
+                        });
+                    }
+                    catch (err) {
+                        this.status.textContent = "FBX import failed: " + (err && err.message ? err.message : String(err));
+                        return;
+                    }
+                    this.fallbackCompleteImportedAsset(asset, shapeName, "FBX");
+                },
+
+                fallbackCompleteImportedAsset: function (asset, shapeName, label) {
+                    var self = this;
+                    setTimeout(function () {
+                        if (asset.ready) return;
+                        self.completeImportedAsset(asset, shapeName, null, label);
+                    }, 1200);
+                },
+
+                completeImportedAsset: function (asset, shapeName, rawS3, label) {
+                    if (!asset || !asset.node) return;
+                    asset.ready = true;
+                    asset.shapeName = shapeName;
+                    asset.node.s("shape3d", shapeName);
+                    asset.node.s("shape3d.light", true);
+                    asset.node.s("wf.visible", true);
+                    asset.node.s("wf.color", "rgba(154, 222, 255, 0.8)");
+
+                    var size = this.normalizeRawSize(rawS3);
+                    if (size) {
+                        var maxDim = Math.max(size[0], size[1], size[2], 1);
+                        var target = 150;
+                        var factor = target / maxDim;
+                        asset.node.s3([
+                            Math.max(20, size[0] * factor),
+                            Math.max(20, size[1] * factor),
+                            Math.max(20, size[2] * factor)
+                        ]);
+                    }
+
+                    var p = asset.node.p3();
+                    if (p) {
+                        var s3 = asset.node.s3();
+                        asset.node.p3([p[0], Math.max(20, (s3 && s3[1] ? s3[1] / 2 : 46)), p[2]]);
+                    }
+                    this.syncMovedImportedAssets();
+                    this.world3d.invalidate();
+                    this.status.textContent = label + " asset imported as " + shapeName + ". Drag it in Edit Mode.";
+                },
+
+                normalizeRawSize: function (rawS3) {
+                    if (!rawS3) return null;
+                    if (Object.prototype.toString.call(rawS3) === "[object Array]" && rawS3.length >= 3) {
+                        return [Math.abs(rawS3[0]) || 1, Math.abs(rawS3[1]) || 1, Math.abs(rawS3[2]) || 1];
+                    }
+                    if (typeof rawS3 === "object") {
+                        var x = rawS3.x != null ? rawS3.x : rawS3.width;
+                        var y = rawS3.y != null ? rawS3.y : rawS3.height;
+                        var z = rawS3.z != null ? rawS3.z : rawS3.depth;
+                        if (x != null && y != null && z != null) {
+                            return [Math.abs(x) || 1, Math.abs(y) || 1, Math.abs(z) || 1];
+                        }
+                    }
+                    return null;
+                },
+
+                createImportedAssetNode: function (shapeName, label) {
+                    this.assetCounter += 1;
+                    var id = "AST-" + this.pad(this.assetCounter, 3);
+                    var worldCenter = this.world3d && this.world3d.getCenter ? this.world3d.getCenter() : [0, 0, 0];
+                    var clamped = this.clampWorldPointToMap(worldCenter[0], worldCenter[2], 40);
+                    var node = new ht.Node();
+                    node.setName(id + " · " + shapeName);
+                    node.p3([clamped.x, 46, clamped.z]);
+                    node.s3([96, 92, 96]);
+                    node.s({
+                        "shape3d": "box",
+                        "shape3d.color": "rgba(182, 216, 236, 0.9)",
+                        "shape3d.top.color": "rgba(215, 236, 251, 0.96)",
+                        "shape3d.light": true,
+                        "wf.visible": true,
+                        "wf.color": "rgba(34, 78, 112, 0.9)"
+                    });
+                    node.a("kind", "importedAsset");
+                    node.a("assetId", id);
+                    node.a("assetLabel", label || "Asset");
+                    this.worldDM.add(node);
+                    var asset = {
+                        id: id,
+                        label: label || "Asset",
+                        shapeName: shapeName,
+                        x: clamped.x,
+                        z: clamped.z,
+                        lat: this.center.lat,
+                        lng: this.center.lng,
+                        ready: false,
+                        node: node
+                    };
+                    this.syncImportedAssetLatLngFromWorld(asset);
+                    this.importedAssets.push(asset);
+                    return asset;
+                },
+
                 bindWorldSelection: function () {
                     var self = this;
                     var sm = this.worldDM.getSelectionModel();
                     sm.setFilterFunc(function (data) {
-                        return data && (data.a("kind") === "building" || data.a("kind") === "buildingPart");
+                        if (!data || !data.a) return false;
+                        var kind = data.a("kind");
+                        return kind === "building" || kind === "buildingPart" || kind === "junction" || kind === "importedAsset";
                     });
                     sm.addSelectionChangeListener(function () {
                         var data = sm.getLastData();
                         if (!data) {
                             return;
                         }
+                        var kind = data.a("kind");
+                        if (kind === "junction") {
+                            self.status.textContent = (data.getName ? data.getName() : "Junction") + " selected";
+                            return;
+                        }
+                        if (kind === "importedAsset") {
+                            self.status.textContent = "Imported asset selected";
+                            return;
+                        }
                         var id = data.a("buildingId");
                         if (id) {
-                            self.selectBuilding(id, true);
+                            self.selectBuilding(id, !self.editMode && !self.roadDrawMode);
                         }
                     });
                 },
@@ -1703,7 +3269,7 @@
 
                     this.selectedId = id;
                     var perms = this.rolePermissions[this.currentRole] || this.rolePermissions.Operator;
-                    this.btnEnter.disabled = !perms.enterBuilding;
+                    this.btnEnter.disabled = this.editMode || this.roadDrawMode || !perms.enterBuilding;
 
                     for (var i = 0; i < this.buildings.length; i++) {
                         var it = this.buildings[i];
@@ -1730,6 +3296,14 @@
                 },
 
                 openDetailView: function (id) {
+                    if (this.editMode) {
+                        this.status.textContent = "Turn off Edit Mode before entering building view";
+                        return;
+                    }
+                    if (this.roadDrawMode) {
+                        this.status.textContent = "Save or stop Road Draw mode before entering building view";
+                        return;
+                    }
                     var b = this.byId[id || this.selectedId];
                     if (!b) {
                         return;
@@ -1910,6 +3484,11 @@
                 },
 
                 tickBuildings: function () {
+                    if (this.editMode) {
+                        this.syncMovedBuildings(false);
+                        this.syncMovedJunctions(false);
+                        this.syncMovedImportedAssets();
+                    }
                     var i;
                     for (i = 0; i < this.buildings.length; i++) {
                         var b = this.buildings[i];
@@ -2008,10 +3587,11 @@
                     var top = this.buildings.slice().sort(function (a, b) {
                         return (b.occupancy + b.energy / 8 + (b.alarm ? 30 : 0)) -
                             (a.occupancy + a.energy / 8 + (a.alarm ? 30 : 0));
-                    }).slice(0, 6);
+                    }).slice(0, 10);
 
-                    this.alertList.innerHTML = "";
+                    if (this.alertList) this.alertList.innerHTML = "";
                     if (this.alertListContrast) this.alertListContrast.innerHTML = "";
+                    if (this.leftAlertList) this.leftAlertList.innerHTML = "";
                     var critical = 0;
                     var watch = 0;
                     var i;
@@ -2023,9 +3603,11 @@
                         if (b.energy > 228) tags.push("energy spike");
                         if (!tags.length) tags.push("watch");
 
-                        var li = document.createElement("li");
-                        li.textContent = b.id + " - " + b.district + " - " + tags.join(", ");
-                        this.alertList.appendChild(li);
+                        if (this.alertList) {
+                            var li = document.createElement("li");
+                            li.textContent = b.id + " - " + b.district + " - " + tags.join(", ");
+                            this.alertList.appendChild(li);
+                        }
 
                         var severity = (b.alarm || b.occupancy > 94 || b.energy > 238) ? "critical" : "watch";
                         if (severity === "critical") critical += 1;
@@ -2038,6 +3620,15 @@
                                 '<span class="alert-badge ' + severity + '">' + severity.toUpperCase() + '</span>' +
                                 '<span class="alert-text">' + b.id + " - " + b.district + " - " + tags.join(", ") + "</span>";
                             this.alertListContrast.appendChild(li2);
+                        }
+
+                        if (this.leftAlertList) {
+                            var li3 = document.createElement("li");
+                            li3.className = "alert-rail-item " + severity;
+                            li3.innerHTML =
+                                '<span class="alert-rail-badge">' + severity.toUpperCase() + "</span>" +
+                                "<span>" + b.id + " · " + b.district + " · " + tags.join(", ") + "</span>";
+                            this.leftAlertList.appendChild(li3);
                         }
                     }
                     if (this.alertCriticalCount) this.alertCriticalCount.textContent = String(critical);
