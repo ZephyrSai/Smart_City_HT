@@ -16,6 +16,7 @@
             --left-rail-w: 214px;
             --right-panel-w: 390px;
             --topbar-h: 58px;
+            --modebar-h: 52px;
         }
 
         * {
@@ -54,8 +55,8 @@
             right: 14px;
             z-index: 100;
             display: flex;
-            align-items: center;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: stretch;
             gap: 8px;
             border: 1px solid rgba(206, 224, 244, 0.42);
             border-radius: 14px;
@@ -64,26 +65,74 @@
             -webkit-backdrop-filter: blur(12px);
             padding: 8px 10px;
             overflow: hidden;
-            white-space: normal;
             min-height: 54px;
         }
 
-        .topbar > * {
-            flex: 0 0 auto;
+        .topbar-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 32px;
         }
 
-        .topbar.collapsed > * {
-            display: none;
+        .topbar-content {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
         }
 
-        .topbar.collapsed #btn-topbar-toggle,
-        .topbar.collapsed #status {
+        .topbar-main-groups {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-content: flex-start;
+        }
+
+        .topbar-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 8px;
+            width: 100%;
+            align-content: flex-start;
+        }
+
+        .top-group {
             display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid rgba(200, 219, 241, 0.3);
+            border-radius: 10px;
+            background: rgba(194, 214, 238, 0.08);
+            padding: 4px 6px;
+            min-height: 34px;
+            max-width: 100%;
+        }
+
+        .top-group.meta {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .group-label {
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+            color: #c9ddef;
+            text-transform: uppercase;
         }
 
         .topbar.collapsed {
             min-height: 42px;
             padding: 6px 10px;
+        }
+
+        .topbar.collapsed .topbar-content,
+        .topbar.collapsed #boot-error {
+            display: none;
         }
 
         .chip {
@@ -123,23 +172,81 @@
         }
 
         #status {
-            margin-left: 0;
+            margin-left: auto;
             font-size: 12px;
             color: #d0deed;
             white-space: nowrap;
-            flex: 1 1 220px;
+            flex: 1 1 180px;
             text-align: right;
+            min-width: 120px;
         }
 
         #boot-error {
             display: none;
-            width: 100%;
             border: 1px solid rgba(239, 194, 194, 0.9);
             border-radius: 8px;
             background: rgba(255, 235, 235, 0.92);
             color: #9f3232;
             font-size: 12px;
             padding: 8px 10px;
+        }
+
+        .mode-switcher {
+            position: absolute;
+            top: calc(14px + var(--topbar-h) + 14px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 96;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(203, 220, 242, 0.44);
+            border-radius: 999px;
+            background: rgba(10, 24, 37, 0.56);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 7px 10px;
+            max-width: calc(100% - 28px);
+        }
+
+        .mode-btn {
+            border: 1px solid rgba(198, 220, 244, 0.52);
+            border-radius: 999px;
+            background: rgba(198, 221, 246, 0.15);
+            color: #eef7ff;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 14px;
+            cursor: pointer;
+            transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+            white-space: nowrap;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .mode-switcher.mode-city #btn-enter-detail {
+            border-color: #ffc36c;
+            background: linear-gradient(160deg, #e28b16, #bb5f00);
+            color: #fff;
+        }
+
+        .mode-switcher.mode-city #btn-city-view {
+            border-color: #6dc8ff;
+            background: linear-gradient(160deg, #248ad8, #176eb4);
+            color: #fff;
+        }
+
+        .mode-switcher.mode-detail #btn-back {
+            border-color: #ffb6a8;
+            background: linear-gradient(160deg, #ca5240, #94382a);
+            color: #fff;
+        }
+
+        .mode-btn[disabled] {
+            opacity: 0.48;
+            cursor: default;
         }
 
         #view-stack {
@@ -188,7 +295,7 @@
 
         .tag {
             position: absolute;
-            top: calc(14px + var(--topbar-h) + 10px);
+            top: calc(14px + var(--topbar-h) + var(--modebar-h) + 10px);
             left: calc(14px + var(--left-rail-w));
             z-index: 20;
             border: 1px solid rgba(204, 216, 228, 0.55);
@@ -220,7 +327,7 @@
         .alert-rail {
             position: absolute;
             left: 14px;
-            top: calc(14px + var(--topbar-h) + 10px);
+            top: calc(14px + var(--topbar-h) + var(--modebar-h) + 10px);
             bottom: 14px;
             width: var(--left-rail-w);
             z-index: 30;
@@ -301,7 +408,7 @@
         .right {
             position: absolute;
             right: 14px;
-            top: calc(14px + var(--topbar-h) + 10px);
+            top: calc(14px + var(--topbar-h) + var(--modebar-h) + 10px);
             bottom: 14px;
             width: var(--right-panel-w);
             z-index: 70;
@@ -356,21 +463,101 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             display: none;
+            white-space: nowrap;
+            max-width: 180px;
         }
 
         .side-tab.left {
-            left: 22px;
-            top: calc(14px + var(--topbar-h) + 10px);
+            left: 14px;
+            top: calc(14px + var(--topbar-h) + var(--modebar-h) + 10px);
         }
 
         .side-tab.right {
-            right: 22px;
-            top: calc(14px + var(--topbar-h) + 10px);
+            right: 14px;
+            top: calc(14px + var(--topbar-h) + var(--modebar-h) + 10px);
         }
 
         .app.left-collapsed .side-tab.left,
         .app.right-collapsed .side-tab.right {
             display: inline-flex;
+        }
+
+        .app.phone-mode .alert-rail,
+        .app.phone-mode .side-tab,
+        .app.phone-mode .right-resizer,
+        .app.phone-mode .left-resizer {
+            display: none !important;
+        }
+
+        .app.phone-mode .topbar {
+            left: 10px;
+            right: 10px;
+            padding: 8px;
+        }
+
+        .app.phone-mode .mode-switcher {
+            top: calc(10px + var(--topbar-h) + 10px);
+            width: auto;
+            padding: 6px 8px;
+            gap: 7px;
+        }
+
+        .app.phone-mode .mode-btn {
+            font-size: 12px;
+            padding: 7px 11px;
+        }
+
+        .app.phone-mode .right {
+            left: 10px;
+            right: 10px;
+            width: auto;
+            top: auto;
+            bottom: 10px;
+            max-height: 42%;
+            gap: 8px;
+            padding: 0;
+            z-index: 80;
+        }
+
+        .app.phone-mode .card {
+            padding: 10px;
+        }
+
+        .app.phone-mode #user-card,
+        .app.phone-mode #district-card,
+        .app.phone-mode .panel-tabs,
+        .app.phone-mode #alerts-pane {
+            display: none !important;
+        }
+
+        .app.phone-mode #btn-right-collapse,
+        .app.phone-mode #btn-left-collapse {
+            display: none !important;
+        }
+
+        .app.phone-mode #kpi-card .title {
+            font-size: 16px;
+        }
+
+        .app.phone-mode #kpi-card .muted {
+            display: none;
+        }
+
+        .app.phone-mode .kpi-grid {
+            margin-top: 4px;
+            gap: 6px;
+        }
+
+        .app.phone-mode .kpi .v {
+            font-size: 22px;
+        }
+
+        .app.phone-mode #dashboard-pane {
+            gap: 8px;
+        }
+
+        .app.phone-mode #selected-card .meta .v {
+            font-size: 14px;
         }
 
         .card {
@@ -792,27 +979,110 @@
             gap: 8px;
         }
 
-        @media (max-width: 980px) {
-            :root {
-                --left-rail-w: 0px;
-                --right-panel-w: 0px;
-            }
-            .alert-rail {
-                display: none;
-            }
-            .side-tab,
-            .right-resizer,
-            .left-resizer {
-                display: none !important;
-            }
+        .login-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 210;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(6, 15, 25, 0.68);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .login-modal.visible {
+            display: flex;
+        }
+
+        .login-card {
+            width: min(420px, calc(100% - 28px));
+            border: 1px solid rgba(198, 220, 244, 0.52);
+            border-radius: 14px;
+            background: rgba(17, 33, 49, 0.92);
+            box-shadow: 0 20px 42px rgba(1, 7, 12, 0.55);
+            padding: 14px;
+            color: #eef7ff;
+        }
+
+        .login-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .login-hint {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #c8def4;
+        }
+
+        .login-row {
+            margin-top: 10px;
+        }
+
+        .login-label {
+            display: block;
+            font-size: 12px;
+            color: #cfe1f5;
+            margin-bottom: 4px;
+        }
+
+        .login-input {
+            width: 100%;
+            border: 1px solid rgba(194, 216, 239, 0.46);
+            border-radius: 9px;
+            background: rgba(233, 245, 255, 0.12);
+            color: #f3f9ff;
+            padding: 9px 10px;
+            font-size: 13px;
+        }
+
+        .login-actions {
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .login-error {
+            margin-top: 8px;
+            min-height: 18px;
+            font-size: 12px;
+            color: #ffbcbc;
+        }
+
+        @media (max-width: 1160px) {
             .topbar {
-                right: 14px;
-                left: 14px;
+                gap: 7px;
             }
-            .right {
-                width: calc(100% - 28px);
-                top: auto;
-                max-height: 48%;
+            .chip {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+            .btn {
+                font-size: 11px;
+            }
+            #status {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .topbar-head {
+                flex-wrap: wrap;
+            }
+            #status {
+                flex: 1 1 100%;
+                text-align: left;
+            }
+            .top-group {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            .top-group.meta {
+                margin-left: 0;
             }
         }
     </style>
@@ -821,23 +1091,44 @@
     <div class="app">
         <section class="left">
             <div class="topbar">
-                <button class="btn" id="btn-topbar-toggle">Collapse Top Bar</button>
-                <span class="chip">Digital Twin: map texture integrated in 3D world</span>
-                <button class="btn" id="btn-city-view">3D City View</button>
-                <button class="btn" id="btn-style">Map Style</button>
-                <button class="btn" id="btn-center">Set Map Center</button>
-                <button class="btn" id="btn-import-asset">Import Asset</button>
-                <button class="btn" id="btn-road-draw">Road Path: Off</button>
-                <button class="btn" id="btn-edit-layout">Edit Layout: Off</button>
-                <button class="btn toggle-on" id="btn-routes">Routes: On</button>
-                <button class="btn primary" id="btn-enter-detail" disabled>Enter Building View</button>
-                <button class="btn" id="btn-back" style="display:none;">Back To 3D World</button>
-                <button class="btn" id="btn-user">User Settings</button>
-                <span class="chip" id="map-meta-chip">Style: Carto Dark · Zoom 16</span>
-                <span class="chip" id="center-chip">Center: 40.7128, -74.0060</span>
-                <span class="chip" id="road-chip">Road Draw: Off</span>
-                <span id="status">Loading map tiles...</span>
+                <div class="topbar-head">
+                    <button class="btn" id="btn-topbar-toggle">Collapse Top Bar</button>
+                    <span class="chip">Digital Twin: map texture integrated in 3D world</span>
+                    <span id="status">Loading map tiles...</span>
+                </div>
+                <div class="topbar-content">
+                    <div class="topbar-main-groups">
+                        <div class="top-group">
+                            <span class="group-label">Map</span>
+                            <button class="btn" id="btn-style">Map Style</button>
+                            <button class="btn" id="btn-center">Set Map Center</button>
+                            <button class="btn" id="btn-import-asset">Import Asset</button>
+                        </div>
+                        <div class="top-group">
+                            <span class="group-label">Layout</span>
+                            <button class="btn" id="btn-road-draw">Road Path: Off</button>
+                            <button class="btn" id="btn-edit-layout">Edit Layout: Off</button>
+                            <button class="btn toggle-on" id="btn-routes">Routes: On</button>
+                        </div>
+                        <div class="top-group">
+                            <span class="group-label">Session</span>
+                            <button class="btn" id="btn-user">User Settings</button>
+                        </div>
+                    </div>
+                    <div class="topbar-meta-row">
+                        <div class="top-group meta">
+                            <span class="chip" id="map-meta-chip">Style: Carto Dark · Zoom 16</span>
+                            <span class="chip" id="center-chip">Center: 40.7128, -74.0060</span>
+                            <span class="chip" id="road-chip">Road Draw: Off</span>
+                        </div>
+                    </div>
+                </div>
                 <div id="boot-error"></div>
+            </div>
+            <div class="mode-switcher mode-city" id="mode-switcher">
+                <button class="mode-btn" id="btn-city-view">3D City View</button>
+                <button class="mode-btn" id="btn-enter-detail" disabled>Enter Building View</button>
+                <button class="mode-btn" id="btn-back" style="display:none;">Back To 3D World</button>
             </div>
 
             <aside class="alert-rail" id="left-alert-rail">
@@ -871,11 +1162,11 @@
 
         <aside class="right" id="right-panel">
             <div class="right-resizer" id="right-resizer"></div>
-            <section class="card">
+            <section class="card" id="user-card">
                 <div class="user-row">
                     <div class="avatar">SC</div>
                     <div>
-                        <div class="title" style="font-size:16px; margin:0;">John Doe</div>
+                        <div class="title" style="font-size:16px; margin:0;" id="user-name">John Doe</div>
                         <div class="muted" id="role-caption">Role: Operator</div>
                     </div>
                     <button class="panel-collapse-btn" id="btn-right-collapse">Hide Dashboard</button>
@@ -885,10 +1176,11 @@
                     <option value="Operator" selected>Operator</option>
                     <option value="Admin">Admin</option>
                 </select>
+                <button class="btn" id="btn-logout" style="margin-top:8px;">Log Out</button>
                 <div class="perm-list" id="perm-list"></div>
             </section>
 
-            <section class="card">
+            <section class="card" id="kpi-card">
                 <h1 class="title">Smart City Digital Twin</h1>
                 <div class="muted">Click a building in the city to transition into building-only mode.</div>
                 <div class="kpi-grid">
@@ -905,12 +1197,12 @@
             </div>
 
             <div id="dashboard-pane" class="stack">
-                <section class="card">
+                <section class="card" id="district-card">
                     <h2 class="title" style="font-size:16px;">District Utilization</h2>
                     <div id="district-bars"></div>
                 </section>
 
-                <section class="card">
+                <section class="card" id="selected-card">
                     <h2 class="title" style="font-size:16px;">Selected Building</h2>
                     <div class="muted" id="selected-name">No building selected</div>
                     <div class="meta-grid">
@@ -955,6 +1247,25 @@
         </div>
     </div>
 
+    <div class="login-modal" id="login-modal">
+        <div class="login-card" role="dialog" aria-modal="true" aria-labelledby="login-title">
+            <h3 class="login-title" id="login-title">Smart City Login</h3>
+            <div class="login-hint">Demo credentials: <b>admin / admin</b></div>
+            <div class="login-row">
+                <label class="login-label" for="login-username">Username</label>
+                <input id="login-username" class="login-input" type="text" autocomplete="username" />
+            </div>
+            <div class="login-row">
+                <label class="login-label" for="login-password">Password</label>
+                <input id="login-password" class="login-input" type="password" autocomplete="current-password" />
+            </div>
+            <div class="login-actions">
+                <button class="btn primary" id="btn-login">Login</button>
+            </div>
+            <div class="login-error" id="login-error"></div>
+        </div>
+    </div>
+
     <script src="ht.js"></script>
     <script>
         (function () {
@@ -962,7 +1273,7 @@
                 center: { lat: 40.7128, lng: -74.0060 },
                 baseZoom: 16,
                 zoom: 16,
-                minZoom: 14,
+                minZoom: 15,
                 maxZoom: 18,
                 baseTileSpan: 6,
                 minTileSpan: 3,
@@ -1062,15 +1373,21 @@
                 zoomCandidate: null,
                 zoomCandidateCount: 0,
                 detailPopupAnchor: null,
+                authStorageKey: "smart_city_demo_auth_v1",
+                appStarted: false,
+                cameraMinDistance: 980,
+                cameraMaxDistance: 3550,
+                cameraCenterMargin: 80,
                 leftRailWidth: 214,
                 rightPanelWidth: 390,
-                collapsedRailGutter: 44,
+                collapsedRailGutter: 0,
                 leftPanelCollapsed: false,
                 rightPanelCollapsed: false,
                 topbarCollapsed: false,
                 activeResize: null,
                 resizeMoveHandler: null,
                 resizeUpHandler: null,
+                topbarResizeObserver: null,
 
                 currentRole: "Operator",
                 rolePermissions: {
@@ -1100,6 +1417,17 @@
                 init: function () {
                     this.cacheDom();
                     this.bindButtons();
+                    if (!this.restoreAuthSession()) {
+                        this.showLoginModal();
+                        return;
+                    }
+                    this.hideLoginModal();
+                    this.startApp();
+                },
+
+                startApp: function () {
+                    if (this.appStarted) return;
+                    this.appStarted = true;
                     this.initLayoutControls();
                     if (!window.ht || !window.ht.graph3d || !window.ht.graph3d.Graph3dView) {
                         this.showBootError("HT Graph3dView runtime not available.");
@@ -1117,6 +1445,7 @@
                     this.updateRoadDrawUi();
                     this.applyRole(this.currentRole);
                     this.openPanelTab("dashboard");
+                    this.updateModeSwitcher();
 
                     this.reloadMapForZoom(this.zoom, true).then(function () {
                         app.activeZoom = app.zoom;
@@ -1138,8 +1467,11 @@
                 cacheDom: function () {
                     this.appRoot = document.querySelector(".app");
                     this.topbar = document.querySelector(".topbar");
+                    this.modeSwitcher = document.getElementById("mode-switcher");
                     this.rightPanel = document.getElementById("right-panel");
                     this.leftAlertRail = document.getElementById("left-alert-rail");
+                    this.userName = document.getElementById("user-name");
+                    this.userAvatar = document.querySelector(".avatar");
                     this.btnTopbarToggle = document.getElementById("btn-topbar-toggle");
                     this.btnLeftCollapse = document.getElementById("btn-left-collapse");
                     this.btnRightCollapse = document.getElementById("btn-right-collapse");
@@ -1184,6 +1516,12 @@
                     this.centerInput = document.getElementById("center-input");
                     this.btnCenterApply = document.getElementById("btn-center-apply");
                     this.btnCenterCancel = document.getElementById("btn-center-cancel");
+                    this.btnLogout = document.getElementById("btn-logout");
+                    this.loginModal = document.getElementById("login-modal");
+                    this.loginUsername = document.getElementById("login-username");
+                    this.loginPassword = document.getElementById("login-password");
+                    this.loginError = document.getElementById("login-error");
+                    this.btnLogin = document.getElementById("btn-login");
 
                     this.kpiBuildings = document.getElementById("kpi-buildings");
                     this.kpiLoad = document.getElementById("kpi-load");
@@ -1274,6 +1612,26 @@
                     this.btnCenterCancel.addEventListener("click", function () {
                         self.closeCenterModal();
                     });
+                    if (this.btnLogout) {
+                        this.btnLogout.addEventListener("click", function () {
+                            self.logout();
+                        });
+                    }
+                    if (this.btnLogin) {
+                        this.btnLogin.addEventListener("click", function () {
+                            self.attemptLogin();
+                        });
+                    }
+                    if (this.loginPassword) {
+                        this.loginPassword.addEventListener("keydown", function (e) {
+                            if (e.key === "Enter") self.attemptLogin();
+                        });
+                    }
+                    if (this.loginUsername) {
+                        this.loginUsername.addEventListener("keydown", function (e) {
+                            if (e.key === "Enter") self.attemptLogin();
+                        });
+                    }
                     this.centerInput.addEventListener("keydown", function (e) {
                         if (e.key === "Enter") {
                             self.applyCenterFromInput();
@@ -1290,6 +1648,13 @@
                 },
 
                 initLayoutControls: function () {
+                    var self = this;
+                    if (window.ResizeObserver && this.topbar) {
+                        this.topbarResizeObserver = new ResizeObserver(function () {
+                            self.applyLayout();
+                        });
+                        this.topbarResizeObserver.observe(this.topbar);
+                    }
                     this.applyLayout();
                 },
 
@@ -1359,7 +1724,8 @@
                 },
 
                 applyLayout: function () {
-                    var compact = window.innerWidth <= 980;
+                    var phone = window.innerWidth <= 760;
+                    var compact = phone;
                     var leftW = compact ? 0 : (this.leftPanelCollapsed ? this.collapsedRailGutter : this.leftRailWidth);
                     var rightW = compact ? 0 : (this.rightPanelCollapsed ? this.collapsedRailGutter : this.rightPanelWidth);
                     document.documentElement.style.setProperty("--left-rail-w", leftW + "px");
@@ -1372,20 +1738,139 @@
                         this.btnTopbarToggle.textContent = this.topbarCollapsed ? "Expand Top Bar" : "Collapse Top Bar";
                     }
                     if (this.leftAlertRail) {
-                        this.leftAlertRail.style.display = (compact || this.leftPanelCollapsed) ? "none" : "flex";
+                        this.leftAlertRail.style.display = (!compact && !this.leftPanelCollapsed) ? "flex" : "none";
                     }
                     if (this.rightPanel) {
-                        this.rightPanel.style.display = (compact || this.rightPanelCollapsed) ? "none" : "flex";
+                        var showRightPanel = phone || (!compact && !this.rightPanelCollapsed);
+                        this.rightPanel.style.display = showRightPanel ? "flex" : "none";
                     }
                     if (this.appRoot) {
+                        this.appRoot.classList.toggle("phone-mode", phone);
                         this.appRoot.classList.toggle("left-collapsed", !compact && this.leftPanelCollapsed);
-                        this.appRoot.classList.toggle("right-collapsed", !compact && this.rightPanelCollapsed);
+                        this.appRoot.classList.toggle("right-collapsed", !compact && this.rightPanelCollapsed && !phone);
+                    }
+                    if (this.btnLeftShow) {
+                        this.btnLeftShow.style.display = (!compact && this.leftPanelCollapsed) ? "inline-flex" : "none";
+                    }
+                    if (this.btnRightShow) {
+                        this.btnRightShow.style.display = (!compact && this.rightPanelCollapsed && !phone) ? "inline-flex" : "none";
+                    }
+                    if (phone && this.dashboardPane && this.dashboardPane.classList.contains("pane-hidden")) {
+                        this.openPanelTab("dashboard");
                     }
 
                     var h = this.topbar ? this.topbar.offsetHeight : 54;
                     document.documentElement.style.setProperty("--topbar-h", (h || 54) + "px");
+                    var modeH = this.modeSwitcher ? (this.modeSwitcher.offsetHeight || 44) + 14 : 0;
+                    document.documentElement.style.setProperty("--modebar-h", modeH + "px");
+                    this.updateModeSwitcher();
                     if (this.world3d) this.world3d.invalidate();
                     if (this.detail3d) this.detail3d.invalidate();
+                },
+
+                updateModeSwitcher: function () {
+                    if (!this.modeSwitcher) return;
+                    this.modeSwitcher.classList.toggle("mode-detail", !!this.detailOpen);
+                    this.modeSwitcher.classList.toggle("mode-city", !this.detailOpen);
+                    if (this.btnCity) {
+                        this.btnCity.setAttribute("aria-pressed", this.detailOpen ? "false" : "true");
+                    }
+                },
+
+                showLoginModal: function () {
+                    if (!this.loginModal) return;
+                    this.loginModal.classList.add("visible");
+                    if (this.loginUsername) {
+                        this.loginUsername.value = "";
+                    }
+                    if (this.loginPassword) {
+                        this.loginPassword.value = "";
+                    }
+                    if (this.loginError) {
+                        this.loginError.textContent = "";
+                    }
+                    var self = this;
+                    setTimeout(function () {
+                        if (self.loginUsername) self.loginUsername.focus();
+                    }, 20);
+                },
+
+                hideLoginModal: function () {
+                    if (!this.loginModal) return;
+                    this.loginModal.classList.remove("visible");
+                },
+
+                restoreAuthSession: function () {
+                    var raw = null;
+                    try {
+                        raw = window.localStorage.getItem(this.authStorageKey);
+                    }
+                    catch (ignore) {
+                    }
+                    if (!raw) return false;
+                    var data = null;
+                    try {
+                        data = JSON.parse(raw);
+                    }
+                    catch (ignore2) {
+                        return false;
+                    }
+                    if (!data || data.username !== "admin" || data.password !== "admin") return false;
+                    this.applySessionUser({ username: "admin", role: "Admin" });
+                    return true;
+                },
+
+                persistAuthSession: function (username, password) {
+                    try {
+                        window.localStorage.setItem(this.authStorageKey, JSON.stringify({
+                            username: username,
+                            password: password,
+                            role: "Admin"
+                        }));
+                    }
+                    catch (ignore) {
+                    }
+                },
+
+                clearAuthSession: function () {
+                    try {
+                        window.localStorage.removeItem(this.authStorageKey);
+                    }
+                    catch (ignore) {
+                    }
+                },
+
+                applySessionUser: function (user) {
+                    var username = user && user.username ? user.username : "admin";
+                    var role = user && user.role ? user.role : "Admin";
+                    if (this.userName) {
+                        this.userName.textContent = username;
+                    }
+                    if (this.userAvatar) {
+                        this.userAvatar.textContent = username.slice(0, 2).toUpperCase();
+                    }
+                    if (this.roleSelect) {
+                        this.roleSelect.value = role;
+                    }
+                    this.currentRole = role;
+                },
+
+                attemptLogin: function () {
+                    var username = this.loginUsername ? this.loginUsername.value.trim().toLowerCase() : "";
+                    var password = this.loginPassword ? this.loginPassword.value.trim() : "";
+                    if (username !== "admin" || password !== "admin") {
+                        if (this.loginError) this.loginError.textContent = "Invalid credentials. Use admin/admin.";
+                        return;
+                    }
+                    this.applySessionUser({ username: "admin", role: "Admin" });
+                    this.persistAuthSession("admin", "admin");
+                    this.hideLoginModal();
+                    this.startApp();
+                },
+
+                logout: function () {
+                    this.clearAuthSession();
+                    window.location.reload();
                 },
 
                 openPanelTab: function (tab) {
@@ -1422,6 +1907,7 @@
                     else {
                         this.tabAlerts.disabled = false;
                     }
+                    this.updateModeSwitcher();
                 },
 
                 renderPermissions: function (perms) {
@@ -2043,11 +2529,66 @@
                     var dz = eye[2] - center[2];
                     var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-                    if (dist > 4200) return this.minZoom;
-                    if (dist > 3300) return this.minZoom + 1;
-                    if (dist > 2550) return this.baseZoom;
+                    if (dist > 3400) return this.minZoom;
+                    if (dist > 2600) return this.baseZoom;
                     if (dist > 1750) return this.baseZoom + 1;
                     return this.maxZoom;
+                },
+
+                enforceWorldCameraBounds: function () {
+                    if (!this.world3d || !this.mapMeta || this.detailOpen) return;
+                    var center = this.world3d.getCenter();
+                    var eye = this.world3d.getEye();
+                    if (!center || !eye) return;
+
+                    var clampedCenterXZ = this.clampWorldPointToMap(center[0], center[2], this.cameraCenterMargin);
+                    var cx = clampedCenterXZ.x;
+                    var cy = this.clamp(center[1], -20, 360);
+                    var cz = clampedCenterXZ.z;
+
+                    var vx = eye[0] - cx;
+                    var vy = eye[1] - cy;
+                    var vz = eye[2] - cz;
+                    var dist = Math.sqrt(vx * vx + vy * vy + vz * vz);
+                    if (!isFinite(dist) || dist < 1) {
+                        vx = 0;
+                        vy = this.cameraMinDistance * 0.72;
+                        vz = this.cameraMinDistance * 0.72;
+                        dist = Math.sqrt(vx * vx + vy * vy + vz * vz);
+                    }
+                    if (dist > this.cameraMaxDistance) {
+                        var downScale = this.cameraMaxDistance / dist;
+                        vx *= downScale;
+                        vy *= downScale;
+                        vz *= downScale;
+                        dist = this.cameraMaxDistance;
+                    }
+                    if (dist < this.cameraMinDistance) {
+                        var upScale = this.cameraMinDistance / dist;
+                        vx *= upScale;
+                        vy *= upScale;
+                        vz *= upScale;
+                        dist = this.cameraMinDistance;
+                    }
+
+                    var minVy = dist * 0.3;
+                    if (vy < minVy) vy = minVy;
+                    var maxVy = dist * 0.95;
+                    if (vy > maxVy) vy = maxVy;
+
+                    var ex = cx + vx;
+                    var ey = cy + vy;
+                    var ez = cz + vz;
+                    var changed = Math.abs(cx - center[0]) > 0.5 ||
+                        Math.abs(cy - center[1]) > 0.5 ||
+                        Math.abs(cz - center[2]) > 0.5 ||
+                        Math.abs(ex - eye[0]) > 0.5 ||
+                        Math.abs(ey - eye[1]) > 0.5 ||
+                        Math.abs(ez - eye[2]) > 0.5;
+                    if (!changed) return;
+
+                    this.world3d.setCenter([cx, cy, cz]);
+                    this.world3d.setEye([ex, ey, ez]);
                 },
 
                 bindWorldInteraction: function () {
@@ -2071,6 +2612,7 @@
                             self.syncMovedImportedAssets();
                         }
                         if (e.kind === "endZoom" || e.kind === "endPinch" || e.kind === "endWalk" || e.kind === "endPan") {
+                            self.enforceWorldCameraBounds();
                             self.syncMapZoomWithCamera(false);
                         }
                     };
@@ -2114,6 +2656,7 @@
                         this.syncMovedImportedAssets();
                         this.status.textContent = "Edit mode OFF: layout fixed";
                     }
+                    this.updateModeSwitcher();
                 },
 
                 startEditSync: function () {
@@ -2421,6 +2964,7 @@
                     if (this.btnEnter) {
                         this.btnEnter.disabled = this.editMode || this.roadDrawMode || !this.selectedId || !perms.enterBuilding;
                     }
+                    this.updateModeSwitcher();
                 },
 
                 toggleRoadDrawMode: function () {
@@ -2621,6 +3165,7 @@
                         clearInterval(this.zoomMonitorTimer);
                     }
                     this.zoomMonitorTimer = setInterval(function () {
+                        self.enforceWorldCameraBounds();
                         self.syncMapZoomWithCamera(false);
                     }, 900);
                 },
@@ -2719,6 +3264,7 @@
                             self.reprojectCustomRoadPathsToCurrentMap();
                             self.rebuildNetworks();
                         }
+                        self.enforceWorldCameraBounds();
                         self.world3d.invalidate();
                     }).catch(function (err) {
                         self.showBootError(err && err.message ? err.message : String(err));
@@ -3290,6 +3836,7 @@
                     }
 
                     this.updateSelectionPanel();
+                    this.updateModeSwitcher();
                     if (openTransition && !this.detailOpen) {
                         this.openDetailView(id);
                     }
@@ -3318,6 +3865,7 @@
                     this.detailOpen = true;
                     this.btnBack.style.display = "";
                     this.btnEnter.style.display = "none";
+                    this.updateModeSwitcher();
                     this.hideDetailPopup();
                     this.detailPopupAnchor = null;
 
@@ -3346,6 +3894,7 @@
                     this.viewStack.classList.remove("detail-mode");
                     this.btnBack.style.display = "none";
                     this.btnEnter.style.display = "";
+                    this.updateModeSwitcher();
                     this.hideDetailPopup();
                     this.detailPopupAnchor = null;
                     this.animateToCityHome();
@@ -3364,7 +3913,9 @@
                 },
 
                 animateToCityHome: function () {
-                    this.animateCamera(this.world3d, [0, 1900, 2200], [0, 0, 0], 520);
+                    var extent = this.mapMeta ? Math.max(this.mapMeta.width * this.unitsPerPixel, this.mapMeta.height * this.unitsPerPixel) : 4800;
+                    var dist = this.clamp(extent * 0.48, 1700, this.cameraMaxDistance - 80);
+                    this.animateCamera(this.world3d, [0, dist * 0.78, dist], [0, 0, 0], 520);
                 },
 
                 prepareDetailScene: function (b) {
