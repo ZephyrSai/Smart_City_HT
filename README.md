@@ -1,15 +1,38 @@
-# Smart City Digital Twin (Basemap + HT 3D)
+# Smart City Digital Twin (HT 3D + Map Basemap)
 
-This demo is now a digital-twin style 3D experience:
+Interactive digital-twin proof of concept built with HT `Graph3dView`.
 
-1. Basemap tiles are loaded and composited into a texture.
-2. That texture is used as the ground/base plane in HT `Graph3dView`.
-3. Buildings are superimposed as 3D blocks on top of the map base.
-4. Clicking a building transitions to a separate building-only 3D view.
-5. Use buttons to move between `3D City View` and `Building View`.
-6. The dashboard is rendered as a glass-tinted overlay pane on top of the full-screen 3D map scene.
-7. Map style can be switched in-app (Carto/OSM), with automatic fallback to OSM if a provider returns zero tiles.
-8. Tile zoom level reloads dynamically based on camera distance (digital-twin style LOD behavior).
+## What It Includes
+
+- Full-screen 3D city world with map tiles composited as a ground texture.
+- Dynamic map style switching (Carto Dark/Light/Voyager and OSM) with tile-source fallback.
+- Zoom-aware tile reload based on camera distance for smoother detail transitions.
+- Selectable buildings with telemetry-driven mock dashboards.
+- Building detail view with popup metrics.
+- RBAC mock roles (`Viewer`, `Operator`, `Admin`) controlling capabilities.
+- Asset import workflow for `OBJ/MTL` and `FBX` model URLs.
+- Editable layout mode to drag buildings, junctions, and imported assets.
+- Route network + manually drawn road paths.
+- Left live-alert glass rail and right dashboard panel.
+- Resizable/collapsible side panels and collapsible top bar.
+
+## Key Controls
+
+- `3D City View` / `Enter Building View` / `Back To 3D World`
+- `Map Style`
+- `Set Map Center` (paste-friendly modal input)
+- `Import Asset`
+- `Road Path`
+  - Turn on road draw mode.
+  - Click scene points (building/junction/map surface) to add waypoints.
+  - Click again to save the road path.
+- `Edit Layout`
+  - Drag movable objects while enabled.
+- `Routes` toggle
+- Sidebar controls
+  - `Hide Alerts`, `Hide Dashboard`
+  - Drag side resizers to change widths.
+- `Collapse Top Bar`
 
 ## Run
 
@@ -19,6 +42,6 @@ Open:
 
 ## Notes
 
-- Map attribution is shown in the UI and updates with style changes.
-- Public tile usage has limits; for production, use compliant tile infrastructure.
+- Attribution is shown in the UI and updates with selected map style.
+- Public tile servers have usage limits; use compliant infrastructure for production.
 - OSM tile policy: https://operations.osmfoundation.org/policies/tiles/
